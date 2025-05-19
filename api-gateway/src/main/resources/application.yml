@@ -1,0 +1,68 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      port: 6379
+      host: localhost
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: book-service
+          uri: lb://book-service
+          predicates:
+            - Path=/api/v1/books/**,/api/v1/book-items/**,/api/v1/shelves/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+
+        - id: borrowing-service
+          uri: lb://borrowing-service
+          predicates:
+            - Path=/api/v1/borrowings/**,/api/v1/borrowing-request/**,/api/v1/penalties/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+library:
+  jwt:
+    base64-secret: "+b83oBEOVUWQeuHEtEqoo2rIovHLrBonFEeYtsJ1tFqF9EYvdZrmi8FFfHqhMakUe3mkfFgUDK+jUxc+hga7/w=="
+    access-token-validity-in-seconds: 86400
+    refresh-token-validity-in-seconds: 86400000
