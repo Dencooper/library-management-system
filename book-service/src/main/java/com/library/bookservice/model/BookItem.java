@@ -1,6 +1,6 @@
 package com.library.bookservice.model;
 
-import com.library.bookservice.constant.BookItemCondition;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,10 +29,6 @@ public class BookItem {
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
-
-    @ManyToOne
-    @JoinColumn(name = "shelf_id")
-    private Shelf shelf;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;

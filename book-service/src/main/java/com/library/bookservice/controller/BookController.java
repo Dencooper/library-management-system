@@ -1,5 +1,7 @@
 package com.library.bookservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.bookservice.dto.request.BookRequest;
 import com.library.bookservice.dto.response.BookResponse;
 import com.library.bookservice.service.IBookService;
@@ -18,11 +20,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookController {
     private final IBookService bookService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookResponse> createBook(
-            @RequestPart("book") @Valid BookRequest request,
-            @RequestPart("image") MultipartFile imageFile) {
+            @RequestPart("book") String bookJson,
+            @RequestParam("image") MultipartFile imageFile
+    )throws JsonProcessingException{
+        BookRequest request = objectMapper.readValue(bookJson, BookRequest.class);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookService.createBook(request, imageFile));
     }
@@ -37,18 +42,19 @@ public class BookController {
         return ResponseEntity.ok(bookService.getAllBooks());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookResponse> updateBook(
             @PathVariable Long id,
-            @RequestBody @Valid BookRequest request
-    ){
+            @RequestPart("book") String bookJson
+    ) throws JsonProcessingException {
+        BookRequest request = objectMapper.readValue(bookJson, BookRequest.class);
         return ResponseEntity.ok(bookService.updateBook(id, request));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookResponse> updateBookImage(
             @PathVariable Long id,
-            @RequestPart("image") MultipartFile imageFile
+            @RequestParam("image") MultipartFile imageFile
     ){
         return ResponseEntity.ok(bookService.updateBookImage(id, imageFile));
     }

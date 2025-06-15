@@ -1,9 +1,9 @@
 package com.library.bookservice.service;
 
-import com.library.bookservice.constant.BookItemCondition;
 import com.library.bookservice.dto.request.BookItemCreationRequest;
 import com.library.bookservice.dto.request.BookItemUpdateRequest;
 import com.library.bookservice.dto.response.BookItemResponse;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -13,9 +13,9 @@ public interface IBookItemService {
 
     BookItemResponse getBookItemById(Long id);
 
-    List<BookItemResponse> getAllBookItems();
+    List<BookItemResponse> getAllBookItems(Boolean isAvailable);
 
-    List<BookItemResponse> getBookItemsByBookId(Long bookId);
+    List<BookItemResponse> getBookItemsByBook(Long bookId, Boolean isAvailable);
 
     BookItemResponse updateBookItem(Long id, BookItemUpdateRequest request);
     BookItemResponse updateAvailableBookItem(Long id, boolean isAvailable);

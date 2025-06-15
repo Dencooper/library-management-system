@@ -12,11 +12,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @EntityGraph(attributePaths = {"author", "categories"})
     Optional<Book> findWithDetailsById(Long id);
 
-
     @EntityGraph(attributePaths = {"author", "categories"})
     @Query("SELECT b FROM Book b")
     List<Book> findAllWithDetails();
-
 
     boolean existsByIsbn(String isbn);
 }

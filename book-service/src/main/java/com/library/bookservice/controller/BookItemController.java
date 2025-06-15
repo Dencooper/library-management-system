@@ -1,10 +1,10 @@
 package com.library.bookservice.controller;
 
-import com.library.bookservice.constant.BookItemCondition;
 import com.library.bookservice.dto.request.BookItemCreationRequest;
 import com.library.bookservice.dto.request.BookItemUpdateRequest;
 import com.library.bookservice.dto.response.BookItemResponse;
 import com.library.bookservice.service.IBookItemService;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,8 +25,10 @@ public class BookItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookItemResponse>> getAllBookItems() {
-        return ResponseEntity.ok(bookItemService.getAllBookItems());
+    public ResponseEntity<List<BookItemResponse>> getAllBookItems(
+            @RequestParam(required = false) Boolean isAvailable
+    ) {
+        return ResponseEntity.ok(bookItemService.getAllBookItems(isAvailable));
     }
 
     @GetMapping("/{id}")
@@ -35,9 +37,12 @@ public class BookItemController {
     }
 
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<List<BookItemResponse>> getBookItemsByBookId(@PathVariable Long bookId) {
-        return ResponseEntity.ok(bookItemService.getBookItemsByBookId(bookId));
+    public ResponseEntity<List<BookItemResponse>> getBookItemsByBookId(
+            @PathVariable Long bookId,
+            @RequestParam(required = false) Boolean isAvailable) {
+        return ResponseEntity.ok(bookItemService.getBookItemsByBook(bookId, isAvailable));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<BookItemResponse> updateBookItem(
@@ -62,8 +67,6 @@ public class BookItemController {
             ){
         return ResponseEntity.ok(bookItemService.updateConditionBookItem(id, condition));
     }
-
-
 
     @PatchMapping("/{id}/delete")
     public ResponseEntity<Void> deleteBookItem(

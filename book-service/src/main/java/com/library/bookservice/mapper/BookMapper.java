@@ -4,6 +4,7 @@ import com.library.bookservice.dto.request.BookRequest;
 import com.library.bookservice.dto.response.BookResponse;
 import com.library.bookservice.model.Author;
 import com.library.bookservice.model.Book;
+import com.library.bookservice.model.BookItem;
 import com.library.bookservice.model.Category;
 import org.springframework.stereotype.Component;
 
@@ -24,19 +25,33 @@ public class BookMapper {
     }
 
     public BookResponse toResponse(Book book) {
-        Set<String> categoryNames = book.getCategories()
+        Set<BookResponse.CategoryDTO> categories = book.getCategories()
                 .stream()
-                .map(Category::getName)
+                .map((category) -> {
+                    return new BookResponse.CategoryDTO(
+                            category.getId(),
+                            category.getName()
+                    );
+                })
                 .collect(Collectors.toSet());
 
-        return new BookResponse(
-                book.getId(),
-                book.getTitle(),
-                book.getIsbn(),
-                book.getImageUrl(),
-                book.getAuthor().getName(),
-                book.getPrice(),
-                categoryNames
-        );
+        return  BookResponse.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .isbn(book.getIsbn())
+                .imageUrl(book.getImageUrl())
+                .author(new BookResponse.AuthorDTO(
+                        book.getAuthor().getId(),
+                        book.getAuthor().getName()
+                ))
+                .price(book.getPrice())
+                .shelf(new BookResponse.ShelfDTO(
+                        book.getShelf().getId(),
+                        book.getShelf().getCode(),
+                        book.getShelf().getLocation()
+                ))
+                .isAvailable(book.getBookItems() != null ? book.getBookItems().stream().anyMatch(BookItem::isAvailable) : null)
+                .categories(categories)
+                .build();
     }
 }

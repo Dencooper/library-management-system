@@ -1,6 +1,6 @@
 package com.library.bookservice.dto.request;
 
-import com.library.bookservice.constant.BookItemCondition;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,9 +18,6 @@ public class BookItemUpdateRequest {
 
     @NotNull(message = "Book ID is required")
     private Long bookId;
-
-    @NotNull(message = "Shelf ID is required")
-    private Long shelfId;
 
     @NotNull(message = "Condition is required")
     private BookItemCondition bookItemCondition;

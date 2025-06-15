@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -33,6 +34,13 @@ public class Book {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @OneToMany(mappedBy = "book")
+    private List<BookItem> bookItems;
+
+    @ManyToOne
+    @JoinColumn(name = "shelf_id")
+    private Shelf shelf;
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)

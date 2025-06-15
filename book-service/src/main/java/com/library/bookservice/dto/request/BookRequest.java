@@ -28,6 +28,8 @@ public class BookRequest {
     @Positive
     private Double price;
 
+    private Long shelfId;
+
     @NotNull(message = "Category IDs are required")
     private Set<Long> categoryIds;
 }

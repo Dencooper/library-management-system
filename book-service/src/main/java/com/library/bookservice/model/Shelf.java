@@ -29,7 +29,7 @@ public class Shelf {
 
     @OneToMany(mappedBy = "shelf")
     @JsonIgnore
-    private Set<BookItem> bookItems = new HashSet<>();
+    private Set<Book> books = new HashSet<>();
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;

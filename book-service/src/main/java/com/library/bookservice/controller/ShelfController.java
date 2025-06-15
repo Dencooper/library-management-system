@@ -36,7 +36,7 @@ public class ShelfController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> updateBookStatus(@PathVariable Long id, @RequestParam boolean isDeleted) {
+    public ResponseEntity<Void> updateShelfStatus(@PathVariable Long id, @RequestParam boolean isDeleted) {
         shelfService.updateDeleteStatus(id, isDeleted);
         return ResponseEntity.ok().build();
     }

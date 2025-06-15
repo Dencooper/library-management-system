@@ -1,17 +1,15 @@
 package com.library.bookservice.service.impl;
 
-import com.library.bookservice.constant.BookItemCondition;
 import com.library.bookservice.dto.request.BookItemCreationRequest;
 import com.library.bookservice.dto.request.BookItemUpdateRequest;
 import com.library.bookservice.dto.response.BookItemResponse;
 import com.library.bookservice.mapper.BookItemMapper;
 import com.library.bookservice.model.Book;
 import com.library.bookservice.model.BookItem;
-import com.library.bookservice.model.Shelf;
 import com.library.bookservice.repository.BookItemRepository;
 import com.library.bookservice.repository.BookRepository;
-import com.library.bookservice.repository.ShelfRepository;
 import com.library.bookservice.service.IBookItemService;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +21,6 @@ import java.util.List;
 public class BookItemServiceImpl implements IBookItemService {
     private final BookItemRepository bookItemRepository;
     private final BookRepository bookRepository;
-    private final ShelfRepository shelfRepository;
     private final BookItemMapper bookItemMapper;
 
     @Override
@@ -31,13 +28,11 @@ public class BookItemServiceImpl implements IBookItemService {
     public BookItemResponse createBookItem(BookItemCreationRequest request) {
         Book book = bookRepository.findById(request.getBookId())
                 .orElseThrow(() -> new RuntimeException("Book not found with ID: " + request.getBookId()));
-        Shelf shelf = shelfRepository.findById(request.getShelfId())
-                .orElseThrow(() -> new RuntimeException("Shelf not found with ID: " + request.getShelfId()));
 
         if (bookItemRepository.existsByCode(request.getCode())) {
             throw new RuntimeException("Code already exists");
         }
-        BookItem bookItem = bookItemMapper.toEntity(request, book, shelf);
+        BookItem bookItem = bookItemMapper.toEntity(request, book);
         return bookItemMapper.toResponse(bookItemRepository.save(bookItem));
     }
 
@@ -51,16 +46,24 @@ public class BookItemServiceImpl implements IBookItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookItemResponse> getAllBookItems() {
-        return bookItemRepository.findAll().stream()
-                .map(bookItemMapper::toResponse)
-                .toList();
+    public List<BookItemResponse> getAllBookItems(Boolean isAvailable) {
+        if(isAvailable == null) {
+            return bookItemRepository.findByIsDeletedFalse().stream()
+                    .map(bookItemMapper::toResponse)
+                    .toList();
+        } else {
+            return bookItemRepository.findByIsDeletedFalseAndIsAvailable(isAvailable).stream()
+                    .map(bookItemMapper::toResponse)
+                    .toList();
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookItemResponse> getBookItemsByBookId(Long bookId) {
-        List<BookItem> items = bookItemRepository.findByBookId(bookId);
+    public List<BookItemResponse> getBookItemsByBook(Long bookId, Boolean isAvailable) {
+        List<BookItem> items = isAvailable != null ?
+                bookItemRepository.findByBookIdAndIsAvailable(bookId, isAvailable) :
+                bookItemRepository.findByBookId(bookId);
         return items.stream()
                 .map(bookItemMapper::toResponse)
                 .toList();
@@ -75,9 +78,6 @@ public class BookItemServiceImpl implements IBookItemService {
         Book book = bookRepository.findById(request.getBookId())
                 .orElseThrow(() -> new RuntimeException("Book not found with ID: " + request.getBookId()));
 
-        Shelf shelf = shelfRepository.findById(request.getShelfId())
-                .orElseThrow(() -> new RuntimeException("Shelf not found with ID: " + request.getShelfId()));
-
         if (bookItemRepository.existsByCode(request.getCode()) && !request.getCode().equals(bookItem.getCode())) {
             throw new RuntimeException("Code already exists");
         }
@@ -85,7 +85,6 @@ public class BookItemServiceImpl implements IBookItemService {
         bookItem.setCode(request.getCode());
         bookItem.setAvailable(request.getIsAvailable());
         bookItem.setBook(book);
-        bookItem.setShelf(shelf);
         bookItem.setBookItemCondition(request.getBookItemCondition());
 
         return bookItemMapper.toResponse(bookItemRepository.save(bookItem));
