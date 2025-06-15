@@ -22,7 +22,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
         return ResponseEntity.ok().body(userService.getUserById(id));
@@ -36,6 +35,11 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers(){
         return ResponseEntity.ok().body(userService.getAllUsers());
+    }
+
+    @GetMapping("/quantity")
+    public ResponseEntity<Long> getUserQuantity(){
+        return ResponseEntity.ok().body(userService.getUserQuantity());
     }
 
     @PutMapping("/{id}")

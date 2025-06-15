@@ -1,5 +1,6 @@
 package com.library.userservice.service.client;
 
+import com.library.commonservice.dto.ApiResponse;
 import com.library.userservice.dto.RegisterRequest;
 import com.library.userservice.dto.UserResponse;
 import jakarta.validation.Valid;
@@ -12,5 +13,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient("AUTH-SERVICE")
 public interface AuthFeignClient {
     @PostMapping(value = "/api/v1/auth", consumes = "application/json")
-    public ResponseEntity<UserResponse> addAccount(@RequestBody RegisterRequest request);
+    public ResponseEntity<ApiResponse<UserResponse>> addAccount(@RequestBody RegisterRequest request);
 }

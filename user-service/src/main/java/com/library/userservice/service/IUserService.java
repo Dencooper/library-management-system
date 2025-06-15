@@ -14,5 +14,5 @@ public interface IUserService {
     UserResponse getUserByEmailInternal(String apiKeyHeader, String email);
     List<UserResponse> getAllUsers();
     Void updateDeleteStatus(Long id, boolean isDeleted);
-
+    Long getUserQuantity();
 }

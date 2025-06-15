@@ -116,4 +116,10 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(user);
         return null;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getUserQuantity() {
+        return userRepository.count();
+    }
 }
