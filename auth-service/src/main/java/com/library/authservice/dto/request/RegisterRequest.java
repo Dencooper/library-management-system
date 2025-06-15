@@ -32,5 +32,4 @@ public class RegisterRequest {
     @NotBlank(message = "Address is required")
     @Size(min = 3, message = "Address must be at least 3 characters")
     private String address;
-
 }

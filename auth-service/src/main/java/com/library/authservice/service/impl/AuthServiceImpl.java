@@ -26,7 +26,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public UserResponse register(RegisterRequest request) {
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
         }
         UserCreationRequest userCreationRequest = UserCreationRequest.builder()
@@ -43,13 +43,13 @@ public class AuthServiceImpl implements IAuthService {
                 .enabled(true)
                 .build();
         userRepository.save(account);
-        return usersFeignClient.createUser(userCreationRequest,aipKey).getBody();
+        return usersFeignClient.createUser(userCreationRequest, aipKey).getBody().getData();
     }
 
     @Override
     @PostAuthorize("hasRole('ADMIN')")
     public Account addAccount(RegisterRequest request) {
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
         }
 
@@ -70,7 +70,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public UserResponse fetchUserByEmail(String email) {
-        return usersFeignClient.getUserByEmail(email, aipKey).getBody();
+        return usersFeignClient.getUserByEmail(email, aipKey).getBody().getData();
     }
 
     @Override
