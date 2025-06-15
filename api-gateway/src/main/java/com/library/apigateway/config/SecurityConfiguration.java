@@ -58,15 +58,18 @@ public class SecurityConfiguration {
         String[] whiteList = {
                 "/api/v1/auth/register",
                 "/api/v1/auth/login",
-                "/api/v1/auth/refresh"
+                "/api/v1/auth/refresh",
+                "/api/v1/users/quantity"
         };
 
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> {})
                 .authorizeExchange(exchange -> exchange
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(whiteList).permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/v1/book-items/book/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())

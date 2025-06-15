@@ -38,7 +38,7 @@ spring:
         - id: borrowing-service
           uri: lb://borrowing-service
           predicates:
-            - Path=/api/v1/borrowings/**,/api/v1/borrowing-request/**,/api/v1/penalties/**
+            - Path=/api/v1/borrowings/**,/api/v1/borrowing-requests/**,/api/v1/penalties/**
           filters:
             - name: RequestRateLimiter
               args:
