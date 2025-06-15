@@ -1,6 +1,6 @@
 package com.library.borrowingservice.dto.response.borrowing;
 
-import com.library.borrowingservice.dto.response.UserResponse;
+import com.library.commonservice.dto.response.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

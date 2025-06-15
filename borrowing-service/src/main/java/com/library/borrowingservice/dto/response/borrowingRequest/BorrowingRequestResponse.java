@@ -1,8 +1,8 @@
 package com.library.borrowingservice.dto.response.borrowingRequest;
 
-import com.library.borrowingservice.constant.BorrowingRequestStatus;
-import com.library.borrowingservice.dto.response.BookResponse;
-import com.library.borrowingservice.dto.response.UserResponse;
+import com.library.commonservice.dto.response.BookResponse;
+import com.library.commonservice.dto.response.UserResponse;
+import com.library.commonservice.utils.constant.BorrowingRequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

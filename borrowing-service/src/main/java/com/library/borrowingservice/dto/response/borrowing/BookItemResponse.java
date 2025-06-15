@@ -1,6 +1,6 @@
 package com.library.borrowingservice.dto.response.borrowing;
 
-import com.library.borrowingservice.constant.BookItemReturnCondition;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,8 @@ public class BookItemResponse {
     private Long id;
     private String code;
     private String bookTitle;
+    private Long bookId;
     private Double price;
-    private BookItemReturnCondition bookItemCondition;
+    private BookItemCondition bookItemCondition;
     private boolean available;
 }

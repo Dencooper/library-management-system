@@ -1,6 +1,6 @@
 package com.library.borrowingservice.model;
 
-import com.library.borrowingservice.constant.BorrowingRequestStatus;
+import com.library.commonservice.utils.constant.BorrowingRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

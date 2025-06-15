@@ -1,6 +1,7 @@
 package com.library.borrowingservice.service;
 
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
+import com.library.borrowingservice.dto.request.borrowingRequest.BorrowingRequestUpdateRequest;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.model.Borrowing;
 
@@ -8,9 +9,10 @@ import java.util.List;
 
 public interface IBorrowingService {
     BorrowingResponse createBorrowing(BorrowingCreationRequest request);
-    BorrowingResponse confirmReturn(Long borrowingId, Borrowing request);
+    BorrowingResponse confirmReturn(BorrowingRequestUpdateRequest request);
     List<BorrowingResponse> getBorrowingsByUser(String email);
     List<BorrowingResponse> getAllBorrowings();
+    List<BorrowingResponse> getMyAllBorrowings();
     BorrowingResponse getBorrowingById(Long id);
     Boolean checkBannedUser(Long userId);
 }

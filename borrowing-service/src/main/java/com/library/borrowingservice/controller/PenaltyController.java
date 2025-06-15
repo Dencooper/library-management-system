@@ -26,7 +26,7 @@ public class PenaltyController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<PenaltyResponse>> getPenaltyById(@RequestParam String email){
+    public ResponseEntity<List<PenaltyResponse>> getPenaltyByUser(@RequestParam String email){
         return ResponseEntity.ok().body(iPenaltyService.getUserPenalties(email));
     }
 

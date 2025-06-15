@@ -1,6 +1,6 @@
 package com.library.borrowingservice.model;
 
-import com.library.borrowingservice.constant.BookItemReturnCondition;
+import com.library.commonservice.utils.constant.BookItemCondition;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +19,7 @@ public class BorrowingItem {
     private Long bookItemId;
 
     @Enumerated(EnumType.STRING)
-    private BookItemReturnCondition bookItemCondition;
+    private BookItemCondition bookItemCondition;
 
     @ManyToOne
     @JoinColumn(name = "borrowing_id")

@@ -1,11 +1,8 @@
 package com.library.borrowingservice.service.impl;
 
-import com.library.borrowingservice.constant.BookItemReturnCondition;
-import com.library.borrowingservice.constant.BorrowingRequestStatus;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
+import com.library.borrowingservice.dto.request.borrowingRequest.BorrowingRequestUpdateRequest;
 import com.library.borrowingservice.dto.request.penalty.PenaltyCreationRequest;
-import com.library.borrowingservice.dto.response.BookResponse;
-import com.library.borrowingservice.dto.response.UserResponse;
 import com.library.borrowingservice.dto.response.borrowing.BookItemResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.mapper.BorrowingMapper;
@@ -19,6 +16,9 @@ import com.library.borrowingservice.service.IPenaltyService;
 import com.library.borrowingservice.service.client.AuthFeignClient;
 import com.library.borrowingservice.service.client.BooksFeignClient;
 import com.library.borrowingservice.service.client.UsersFeignClient;
+import com.library.commonservice.dto.response.UserResponse;
+import com.library.commonservice.utils.constant.BookItemCondition;
+import com.library.commonservice.utils.constant.BorrowingRequestStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -45,25 +45,26 @@ public class BorrowingServiceImpl implements IBorrowingService {
         BorrowingRequest borrowingRequest = borrowingRequestRepository.findById(request.getBorrowingRequestId())
                 .orElseThrow(() -> new RuntimeException("Borrowing request not found"));
 
-        if(borrowingRepository.existsByBorrowingRequestId(borrowingRequest.getId())){
+        if (borrowingRepository.existsByBorrowingRequestId(borrowingRequest.getId())) {
             throw new RuntimeException("This borrowing request already handled.");
         }
 
-        if(checkBannedUser(borrowingRequest.getUserId())){
+        if (checkBannedUser(borrowingRequest.getUserId())) {
             throw new RuntimeException("User " + borrowingRequest.getUserId() + "  is banned in system");
         }
 
-        if(borrowingRequest.getAcceptedAt() == null){
+        if (borrowingRequest.getAcceptedAt() == null) {
             throw new RuntimeException("This borrowing request is not be accepted.");
         }
 
-        if(borrowingRequestRepository.existsByUserIdAndStatus(borrowingRequest.getUserId() ,BorrowingRequestStatus.PENDING)){
+        if (borrowingRequestRepository.existsByUserIdAndStatus(borrowingRequest.getUserId(),
+                BorrowingRequestStatus.PENDING)) {
             throw new RuntimeException("You have a pending borrowing request");
         }
 
         Borrowing borrowing = Borrowing.builder()
                 .userId(borrowingRequest.getUserId())
-                .librarianId(authFeignClient.fetchUser().getBody().getId())
+                .librarianId(authFeignClient.fetchUser().getBody().getData().getId())
                 .borrowedAt(LocalDateTime.now())
                 .isLate(false)
                 .borrowingRequest(borrowingRequest)
@@ -72,13 +73,13 @@ public class BorrowingServiceImpl implements IBorrowingService {
         List<BorrowingItem> items = request.getBookItemIds()
                 .stream()
                 .map(item -> {
-                    BookItemResponse bookItem = booksFeignClient.getBookItemById(item).getBody();
+                    BookItemResponse bookItem = booksFeignClient.getBookItemById(item).getBody().getData();
 
-                    if(!bookItem.isAvailable()){
+                    if (!bookItem.isAvailable()) {
                         throw new RuntimeException(bookItem.getCode() + " is not available");
                     }
 
-                    bookItem = booksFeignClient.updateAvailableBookItem(item, false).getBody();
+                    bookItem = booksFeignClient.updateAvailableBookItem(item, false).getBody().getData();
                     return BorrowingItem.builder()
                             .bookItemId(bookItem.getId())
                             .bookItemCondition(bookItem.getBookItemCondition())
@@ -89,6 +90,8 @@ public class BorrowingServiceImpl implements IBorrowingService {
 
         borrowing.setItems(items);
         borrowingRepository.save(borrowing);
+        borrowingRequest.setStatus(BorrowingRequestStatus.BORROWING_CREATED);
+        borrowingRequestRepository.save(borrowingRequest);
         return borrowingMapper.toResponse(borrowing);
     }
 
@@ -96,6 +99,14 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @Transactional(readOnly = true)
     public List<BorrowingResponse> getAllBorrowings() {
         return borrowingRepository.findAll().stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<BorrowingResponse> getMyAllBorrowings() {
+        return  borrowingRepository.findAllByUserId(authFeignClient.fetchUser().getBody().getData().getId())
+                .stream()
                 .map(borrowingMapper::toResponse)
                 .toList();
     }
@@ -111,16 +122,17 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public BorrowingResponse confirmReturn(Long borrowingId, Borrowing request) {
-        Borrowing borrowing = borrowingRepository.findById(borrowingId)
+    public BorrowingResponse confirmReturn(BorrowingRequestUpdateRequest request) {
+        Borrowing borrowing = borrowingRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Borrowing not found"));
 
         double amount = 0.0;
 
-        for(BorrowingItem item : request.getItems()){
-            if(item.getBookItemCondition().equals(BookItemReturnCondition.LOST) ||
-                    item.getBookItemCondition().equals(BookItemReturnCondition.MAJOR_DAMAGE)){
-                BookItemResponse bookItemResponse = booksFeignClient.getBookItemById(item.getBookItemId()).getBody();
+        for (BorrowingItem item : request.getItems()) {
+            if (item.getBookItemCondition().equals(BookItemCondition.LOST) ||
+                    item.getBookItemCondition().equals(BookItemCondition.MAJOR_DAMAGE)) {
+                BookItemResponse bookItemResponse = booksFeignClient.getBookItemById(item.getBookItemId()).getBody()
+                        .getData();
                 booksFeignClient.updateConditionBookItem(item.getBookItemId(), item.getBookItemCondition());
                 amount += bookItemResponse.getPrice();
             } else {
@@ -128,17 +140,16 @@ public class BorrowingServiceImpl implements IBorrowingService {
             }
         }
 
-        if(amount > 0.0){
+        if (amount > 0.0) {
             penaltyService.createPenalty(PenaltyCreationRequest.builder()
-                            .borrowingId(borrowingId)
-                            .amount(amount)
-                            .description(request.getPenaltyDescription())
-                            .build()
-            );
+                    .borrowingId(request.getId())
+                    .amount(amount)
+                    .description(request.getPenaltyDescription())
+                    .build());
         }
 
         borrowing.setReturnedAt(LocalDateTime.now());
-        if(LocalDateTime.now().isAfter(borrowing.getBorrowedAt().plusDays(30))){
+        if (LocalDateTime.now().isAfter(borrowing.getBorrowedAt().plusDays(30))) {
             borrowing.setIsLate(true);
         }
         borrowingRepository.save(borrowing);
@@ -148,7 +159,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @Override
     @Transactional(readOnly = true)
     public List<BorrowingResponse> getBorrowingsByUser(String email) {
-        UserResponse user = usersFeignClient.getUserByEmail(email).getBody();
+        UserResponse user = usersFeignClient.getUserByEmail(email).getBody().getData();
 
         return borrowingRepository.findAllByUserId(user.getId()).stream()
                 .map(borrowingMapper::toResponse)
@@ -160,8 +171,8 @@ public class BorrowingServiceImpl implements IBorrowingService {
     public Boolean checkBannedUser(Long userId) {
         List<Borrowing> borrowings = borrowingRepository.findAllByUserId(userId);
         int count = 0;
-        for (Borrowing borrowing : borrowings){
-            if(borrowing.getIsLate() || borrowing.getPenalty() != null){
+        for (Borrowing borrowing : borrowings) {
+            if (borrowing.getIsLate() || borrowing.getPenalty() != null) {
                 count++;
             }
         }

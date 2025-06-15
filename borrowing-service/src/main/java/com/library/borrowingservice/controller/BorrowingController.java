@@ -1,6 +1,7 @@
 package com.library.borrowingservice.controller;
 
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
+import com.library.borrowingservice.dto.request.borrowingRequest.BorrowingRequestUpdateRequest;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.model.Borrowing;
 import com.library.borrowingservice.service.IBorrowingService;
@@ -29,7 +30,7 @@ public class BorrowingController {
         return ResponseEntity.ok().body(iBorrowingService.getBorrowingById(id));
     }
 
-    @GetMapping("/user")
+    @GetMapping("/email")
     public ResponseEntity<List<BorrowingResponse>> getBorrowingsByUser(@RequestParam String email){
         return ResponseEntity.ok().body(iBorrowingService.getBorrowingsByUser(email));
     }
@@ -39,8 +40,13 @@ public class BorrowingController {
         return ResponseEntity.ok().body(iBorrowingService.getAllBorrowings());
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<List<BorrowingResponse>> getMyAllBorrowings(){
+        return ResponseEntity.ok().body(iBorrowingService.getMyAllBorrowings());
+    }
+
     @PatchMapping("/return")
-    ResponseEntity<BorrowingResponse> returnBook(@RequestBody Borrowing request){
-        return ResponseEntity.ok().body(iBorrowingService.confirmReturn(request.getId(), request));
+    ResponseEntity<BorrowingResponse> returnBook(@RequestBody BorrowingRequestUpdateRequest request){
+        return ResponseEntity.ok().body(iBorrowingService.confirmReturn(request));
     }
 }

@@ -1,9 +1,6 @@
 package com.library.borrowingservice.dto.response.penalty;
 
-import com.library.borrowingservice.dto.response.UserResponse;
-import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
-import com.library.borrowingservice.model.Borrowing;
-import jakarta.persistence.*;
+import com.library.commonservice.dto.response.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +17,7 @@ public class PenaltyResponse {
     private UserResponse user;
     private double amount;
     private String description;
+    private Long borrowingId;
     private LocalDateTime penaltyAt;
     private boolean isPaid;
 }

@@ -1,8 +1,6 @@
 package com.library.borrowingservice.service.impl;
 
-import com.library.borrowingservice.constant.BorrowingRequestStatus;
 import com.library.borrowingservice.dto.request.penalty.PenaltyCreationRequest;
-import com.library.borrowingservice.dto.response.UserResponse;
 import com.library.borrowingservice.dto.response.penalty.PenaltyResponse;
 import com.library.borrowingservice.mapper.PenaltyMapper;
 import com.library.borrowingservice.model.Borrowing;
@@ -11,6 +9,7 @@ import com.library.borrowingservice.repository.BorrowingRepository;
 import com.library.borrowingservice.repository.PenaltyRepository;
 import com.library.borrowingservice.service.IPenaltyService;
 import com.library.borrowingservice.service.client.UsersFeignClient;
+import com.library.commonservice.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,7 @@ public class PenaltyServiceImpl implements IPenaltyService {
     @Override
     @Transactional(readOnly = true)
     public List<PenaltyResponse> getUserPenalties(String email) {
-        UserResponse user = usersFeignClient.getUserByEmail(email).getBody();
+        UserResponse user = usersFeignClient.getUserByEmail(email).getBody().getData();
         return penaltyRepository.findAllByBorrowingIn(borrowingRepository.findAllByUserId(user.getId())).stream()
                 .map(penaltyMapper::toResponse)
                 .toList();
@@ -79,6 +78,5 @@ public class PenaltyServiceImpl implements IPenaltyService {
         penaltyRepository.save(penalty);
         return penaltyMapper.toResponse(penalty);
     }
-
 
 }
