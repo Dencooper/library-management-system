@@ -135,4 +135,10 @@ public class BookServiceImpl implements IBookService {
 
         return bookMapper.toResponse(updatedBook);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getBookQuantity() {
+        return bookRepository.count();
+    }
 }

@@ -1,7 +1,6 @@
 package com.library.bookservice.service.impl;
 
 import com.library.bookservice.dto.request.BookItemCreationRequest;
-import com.library.bookservice.dto.request.BookItemUpdateRequest;
 import com.library.bookservice.dto.response.BookItemResponse;
 import com.library.bookservice.mapper.BookItemMapper;
 import com.library.bookservice.model.Book;
@@ -9,12 +8,14 @@ import com.library.bookservice.model.BookItem;
 import com.library.bookservice.repository.BookItemRepository;
 import com.library.bookservice.repository.BookRepository;
 import com.library.bookservice.service.IBookItemService;
+import com.library.commonservice.dto.request.BookItemUpdateRequest;
 import com.library.commonservice.utils.constant.BookItemCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -70,39 +71,29 @@ public class BookItemServiceImpl implements IBookItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public BookItemResponse getBookItemByCode(String code) {
+        BookItem bookItem = bookItemRepository.findByCodeAndIsAvailableTrue(code)
+                .orElseThrow(() -> new RuntimeException("BookItem not found with code: " + code));
+        return bookItemMapper.toResponse(bookItem);
+    }
+
+    @Override
     @Transactional
     public BookItemResponse updateBookItem(Long id, BookItemUpdateRequest request) {
         BookItem bookItem = bookItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("BookItem not found with ID: " + id));
 
-        Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new RuntimeException("Book not found with ID: " + request.getBookId()));
-
         if (bookItemRepository.existsByCode(request.getCode()) && !request.getCode().equals(bookItem.getCode())) {
             throw new RuntimeException("Code already exists");
         }
 
-        bookItem.setCode(request.getCode());
+        if(request.getCode() != null) {
+            bookItem.setCode(request.getCode());
+        }
         bookItem.setAvailable(request.getIsAvailable());
-        bookItem.setBook(book);
         bookItem.setBookItemCondition(request.getBookItemCondition());
 
-        return bookItemMapper.toResponse(bookItemRepository.save(bookItem));
-    }
-
-    @Override
-    public BookItemResponse updateAvailableBookItem(Long id, boolean isAvailable) {
-        BookItem bookItem = bookItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BookItem not found with ID: " + id));
-        bookItem.setAvailable(isAvailable);
-        return bookItemMapper.toResponse(bookItemRepository.save(bookItem));
-    }
-
-    @Override
-    public BookItemResponse updateConditionBookItem(Long id, BookItemCondition condition) {
-        BookItem bookItem = bookItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BookItem not found with ID: " + id));
-        bookItem.setBookItemCondition(condition);
         return bookItemMapper.toResponse(bookItemRepository.save(bookItem));
     }
 

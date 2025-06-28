@@ -58,4 +58,9 @@ public class BookController {
     ){
         return ResponseEntity.ok(bookService.updateBookImage(id, imageFile));
     }
+
+    @GetMapping("/quantity")
+    public ResponseEntity<Long> getUserQuantity(){
+        return ResponseEntity.ok().body(bookService.getBookQuantity());
+    }
 }

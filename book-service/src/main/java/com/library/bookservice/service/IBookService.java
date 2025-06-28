@@ -12,4 +12,5 @@ public interface IBookService {
     List<BookResponse> getAllBooks();
     BookResponse updateBook(Long bookId, BookRequest request);
     BookResponse updateBookImage(Long bookId, MultipartFile imageFile);
+    Long getBookQuantity();
 }

@@ -79,6 +79,7 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/book-items/book/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/book-items").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

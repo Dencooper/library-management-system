@@ -1,10 +1,9 @@
 package com.library.bookservice.controller;
 
 import com.library.bookservice.dto.request.BookItemCreationRequest;
-import com.library.bookservice.dto.request.BookItemUpdateRequest;
 import com.library.bookservice.dto.response.BookItemResponse;
 import com.library.bookservice.service.IBookItemService;
-import com.library.commonservice.utils.constant.BookItemCondition;
+import com.library.commonservice.dto.request.BookItemUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +35,11 @@ public class BookItemController {
         return ResponseEntity.ok(bookItemService.getBookItemById(id));
     }
 
+    @GetMapping("/code")
+    public ResponseEntity<BookItemResponse> getBookItemByCode(@RequestParam String code) {
+        return ResponseEntity.ok(bookItemService.getBookItemByCode(code));
+    }
+
     @GetMapping("/book/{bookId}")
     public ResponseEntity<List<BookItemResponse>> getBookItemsByBookId(
             @PathVariable Long bookId,
@@ -43,29 +47,12 @@ public class BookItemController {
         return ResponseEntity.ok(bookItemService.getBookItemsByBook(bookId, isAvailable));
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<BookItemResponse> updateBookItem(
             @PathVariable Long id,
             @Valid @RequestBody BookItemUpdateRequest request
     ) {
         return ResponseEntity.ok(bookItemService.updateBookItem(id, request));
-    }
-
-    @PutMapping("/available/{id}")
-    public ResponseEntity<BookItemResponse> updateAvailableBookItem(
-            @PathVariable Long id,
-            @RequestBody boolean isAvailable
-    ) {
-        return ResponseEntity.ok(bookItemService.updateAvailableBookItem(id, isAvailable));
-    }
-
-    @PutMapping("/condition/{id}")
-    public ResponseEntity<BookItemResponse> updateConditionBookItem(
-            @PathVariable Long id,
-            @RequestBody BookItemCondition condition
-            ){
-        return ResponseEntity.ok(bookItemService.updateConditionBookItem(id, condition));
     }
 
     @PatchMapping("/{id}/delete")
