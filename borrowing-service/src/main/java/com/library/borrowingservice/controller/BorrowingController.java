@@ -1,12 +1,11 @@
 package com.library.borrowingservice.controller;
 
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
-import com.library.borrowingservice.dto.request.borrowingRequest.BorrowingRequestUpdateRequest;
+import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.model.Borrowing;
 import com.library.borrowingservice.service.IBorrowingService;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +45,12 @@ public class BorrowingController {
     }
 
     @PatchMapping("/return")
-    ResponseEntity<BorrowingResponse> returnBook(@RequestBody BorrowingRequestUpdateRequest request){
-        return ResponseEntity.ok().body(iBorrowingService.confirmReturn(request));
+    ResponseEntity<BorrowingResponse> returnBook(@Valid @RequestBody ReturnBookRequest request){
+        return ResponseEntity.ok().body(iBorrowingService.returnBook(request));
+    }
+
+    @GetMapping("/quantity")
+    public ResponseEntity<Long> getBorrowingQuantity(){
+        return ResponseEntity.ok().body(iBorrowingService.getBorrowingQuantity());
     }
 }

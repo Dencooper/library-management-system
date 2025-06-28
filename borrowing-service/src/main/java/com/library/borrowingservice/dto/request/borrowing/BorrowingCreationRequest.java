@@ -1,6 +1,6 @@
 package com.library.borrowingservice.dto.request.borrowing;
 
-import com.library.borrowingservice.model.BorrowingRequest;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,9 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class BorrowingCreationRequest {
-    @NotNull(message = "BorrowingRequest is required")
-    private Long borrowingRequestId;
-
+    @NotBlank(message = "Email must be not blank")
+    private String email;
     @NotEmpty(message = "At least one BookItemId must be provided")
     private List<Long> bookItemIds;
+    private String description;
 }

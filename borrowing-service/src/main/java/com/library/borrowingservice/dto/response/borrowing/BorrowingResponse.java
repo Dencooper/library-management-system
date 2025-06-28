@@ -21,5 +21,5 @@ public class BorrowingResponse {
     private LocalDateTime returnedAt;
     private Boolean isLate;
     private List<BookItemResponse> items;
-    private String penaltyDescription;
+    private String description;
 }

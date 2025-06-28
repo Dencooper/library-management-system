@@ -2,12 +2,14 @@ package com.library.borrowingservice.service.impl;
 
 import com.library.borrowingservice.dto.request.penalty.PenaltyCreationRequest;
 import com.library.borrowingservice.dto.response.penalty.PenaltyResponse;
+import com.library.borrowingservice.mapper.BorrowingMapper;
 import com.library.borrowingservice.mapper.PenaltyMapper;
 import com.library.borrowingservice.model.Borrowing;
 import com.library.borrowingservice.model.Penalty;
 import com.library.borrowingservice.repository.BorrowingRepository;
 import com.library.borrowingservice.repository.PenaltyRepository;
 import com.library.borrowingservice.service.IPenaltyService;
+import com.library.borrowingservice.service.client.AuthFeignClient;
 import com.library.borrowingservice.service.client.UsersFeignClient;
 import com.library.commonservice.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,8 @@ public class PenaltyServiceImpl implements IPenaltyService {
     private final PenaltyRepository penaltyRepository;
     private final BorrowingRepository borrowingRepository;
     private final PenaltyMapper penaltyMapper;
-    private final UsersFeignClient usersFeignClient;
+    private final BorrowingMapper borrowingMapper;
+    private final AuthFeignClient authFeignClient;
 
     @Override
     @Transactional
@@ -60,9 +63,10 @@ public class PenaltyServiceImpl implements IPenaltyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PenaltyResponse> getUserPenalties(String email) {
-        UserResponse user = usersFeignClient.getUserByEmail(email).getBody().getData();
-        return penaltyRepository.findAllByBorrowingIn(borrowingRepository.findAllByUserId(user.getId())).stream()
+    public List<PenaltyResponse> getUserPenalties() {
+        List<Borrowing> borrowings = borrowingRepository.findAllByUserId(authFeignClient.fetchUser().getBody().getData().getId());
+        return  penaltyRepository.findAllByBorrowingIn(borrowings)
+                .stream()
                 .map(penaltyMapper::toResponse)
                 .toList();
     }

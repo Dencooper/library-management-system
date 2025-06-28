@@ -37,7 +37,7 @@ public class BorrowingMapper {
                                 .librarian(librarian.getBody().getData())
                                 .borrowedAt(borrowing.getBorrowedAt())
                                 .returnedAt(borrowing.getReturnedAt())
-                                .penaltyDescription(borrowing.getPenaltyDescription())
+                                .description(borrowing.getDescription())
                                 .isLate(borrowing.getIsLate())
                                 .items(bookItemResponses)
                                 .build();

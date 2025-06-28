@@ -31,14 +31,10 @@ public class Borrowing {
 
     private Boolean isLate;
 
-    private String penaltyDescription;
+    private String description;
 
     @OneToMany(mappedBy = "borrowing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BorrowingItem> items = new ArrayList<>();
-
-    @OneToOne
-    @JoinColumn(name = "borrowing_request_id")
-    private BorrowingRequest borrowingRequest;
 
     @OneToOne(mappedBy = "borrowing", cascade = CascadeType.ALL)
     private Penalty penalty;

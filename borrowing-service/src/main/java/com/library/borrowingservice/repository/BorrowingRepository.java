@@ -13,5 +13,4 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     List<Borrowing> findAllByReturnedAtIsNull();
 
-    boolean existsByBorrowingRequestId(Long borrowingRequestId);
 }

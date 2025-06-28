@@ -10,7 +10,7 @@ public interface IPenaltyService {
     PenaltyResponse createPenalty(PenaltyCreationRequest request);
     PenaltyResponse getPenaltyById(Long id);
     List<PenaltyResponse> getAllPenalties();
-    List<PenaltyResponse> getUserPenalties(String email);
+    List<PenaltyResponse> getUserPenalties();
     PenaltyResponse updatePenalty(Long id, Penalty request);
 
 }
