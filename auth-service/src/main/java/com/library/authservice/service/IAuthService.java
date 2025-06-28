@@ -1,8 +1,8 @@
 package com.library.authservice.service;
 
 import com.library.authservice.dto.request.RegisterRequest;
-import com.library.authservice.dto.response.UserResponse;
 import com.library.authservice.model.Account;
+import com.library.commonservice.dto.response.UserResponse;
 
 public interface IAuthService {
     UserResponse register(RegisterRequest request);

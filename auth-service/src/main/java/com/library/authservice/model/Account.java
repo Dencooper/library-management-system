@@ -24,6 +24,4 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    private boolean enabled = true;
 }

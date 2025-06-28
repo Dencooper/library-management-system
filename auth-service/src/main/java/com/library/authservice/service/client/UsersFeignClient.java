@@ -1,9 +1,8 @@
 package com.library.authservice.service.client;
 
-import com.library.authservice.dto.request.RegisterRequest;
 import com.library.authservice.dto.request.UserCreationRequest;
-import com.library.authservice.dto.response.UserResponse;
 import com.library.commonservice.dto.ApiResponse;
+import com.library.commonservice.dto.response.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

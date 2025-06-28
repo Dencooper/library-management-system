@@ -3,11 +3,11 @@ package com.library.authservice.service.impl;
 import com.library.authservice.constant.Role;
 import com.library.authservice.dto.request.RegisterRequest;
 import com.library.authservice.dto.request.UserCreationRequest;
-import com.library.authservice.dto.response.UserResponse;
 import com.library.authservice.model.Account;
-import com.library.authservice.repository.UserRepository;
+import com.library.authservice.repository.AccountRepository;
 import com.library.authservice.service.IAuthService;
 import com.library.authservice.service.client.UsersFeignClient;
+import com.library.commonservice.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final UsersFeignClient usersFeignClient;
     private final PasswordEncoder passwordEncoder;
 
@@ -26,7 +26,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (accountRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
         }
         UserCreationRequest userCreationRequest = UserCreationRequest.builder()
@@ -40,16 +40,15 @@ public class AuthServiceImpl implements IAuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
-                .enabled(true)
                 .build();
-        userRepository.save(account);
+        accountRepository.save(account);
         return usersFeignClient.createUser(userCreationRequest, aipKey).getBody().getData();
     }
 
     @Override
     @PostAuthorize("hasRole('ADMIN')")
     public Account addAccount(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (accountRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
         }
 
@@ -57,14 +56,13 @@ public class AuthServiceImpl implements IAuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.LIBRARIAN)
-                .enabled(true)
                 .build();
-        return userRepository.save(account);
+        return accountRepository.save(account);
     }
 
     @Override
     public Account fetchAccountByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User with email: " + email + " is existed"));
     }
 
@@ -75,15 +73,15 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public Account updateRefreshToken(String email, String refreshToken) {
-        Account account = userRepository.findByEmail(email)
+        Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User with email: " + email + " is existed"));
         account.setRefreshToken(refreshToken);
-        return userRepository.save(account);
+        return accountRepository.save(account);
     }
 
     @Override
     public Account fetchAccountByRefreshTokenAndEmail(String token, String email) {
-        return userRepository.findByRefreshTokenAndEmail(token, email)
+        return accountRepository.findByRefreshTokenAndEmail(token, email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

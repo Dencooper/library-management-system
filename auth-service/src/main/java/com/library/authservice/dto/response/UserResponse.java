@@ -18,5 +18,6 @@ public class UserResponse {
     private String email;
     private String phone;
     private String address;
+    private boolean isBanned;
     private Role role;
 }
