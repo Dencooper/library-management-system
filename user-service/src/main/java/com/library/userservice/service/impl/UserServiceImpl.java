@@ -1,8 +1,8 @@
 package com.library.userservice.service.impl;
 
+import com.library.commonservice.dto.response.UserResponse;
 import com.library.userservice.dto.RegisterRequest;
 import com.library.userservice.dto.UserRequest;
-import com.library.userservice.dto.UserResponse;
 import com.library.userservice.mapper.UserMapper;
 import com.library.userservice.model.User;
 import com.library.userservice.repository.UserRepository;
@@ -11,12 +11,8 @@ import com.library.userservice.service.client.AuthFeignClient;
 import com.library.userservice.utils.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

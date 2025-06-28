@@ -1,7 +1,7 @@
 package com.library.userservice.controller;
 
+import com.library.commonservice.dto.response.UserResponse;
 import com.library.userservice.dto.UserRequest;
-import com.library.userservice.dto.UserResponse;
 import com.library.userservice.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

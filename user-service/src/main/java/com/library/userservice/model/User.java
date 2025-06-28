@@ -1,6 +1,6 @@
 package com.library.userservice.model;
 
-import com.library.userservice.utils.constant.Role;
+import com.library.commonservice.utils.constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,6 +35,9 @@ public class User {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
+
+    @Column(name = "is_banned", nullable = false)
+    private boolean isBanned = false;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

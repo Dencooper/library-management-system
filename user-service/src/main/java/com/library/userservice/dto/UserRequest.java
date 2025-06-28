@@ -1,8 +1,6 @@
 package com.library.userservice.dto;
 
-import com.library.userservice.utils.constant.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.library.commonservice.utils.constant.Role;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

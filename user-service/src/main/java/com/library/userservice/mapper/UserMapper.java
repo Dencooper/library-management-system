@@ -1,7 +1,7 @@
 package com.library.userservice.mapper;
 
+import com.library.commonservice.dto.response.UserResponse;
 import com.library.userservice.dto.UserRequest;
-import com.library.userservice.dto.UserResponse;
 import com.library.userservice.model.User;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +27,7 @@ public class UserMapper {
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .isBanned(user.isBanned())
                 .build();
     }
 

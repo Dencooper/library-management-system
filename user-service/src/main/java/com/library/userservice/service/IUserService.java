@@ -1,7 +1,7 @@
 package com.library.userservice.service;
 
+import com.library.commonservice.dto.response.UserResponse;
 import com.library.userservice.dto.UserRequest;
-import com.library.userservice.dto.UserResponse;
 
 import java.util.List;
 

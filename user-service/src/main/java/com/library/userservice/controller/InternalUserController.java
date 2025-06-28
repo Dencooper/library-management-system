@@ -1,11 +1,10 @@
 package com.library.userservice.controller;
 
+import com.library.commonservice.dto.response.UserResponse;
 import com.library.userservice.dto.UserRequest;
-import com.library.userservice.dto.UserResponse;
 import com.library.userservice.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
