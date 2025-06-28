@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100">
+
     <!-- Header with Back Button -->
     <header class="bg-white shadow-sm border-b">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,22 +55,22 @@
               <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>by {{ book.authorName }}</span>
+              <span>by {{ book.author.name }}</span>
             </div>
 
             <!-- Categories -->
             <div class="flex flex-wrap gap-2 mb-6">
               <span
-                v-for="category in book.categoryNames"
-                :key="category"
+                v-for="category in book.categories"
+                :key="category.id"
                 class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
               >
-                {{ category }}
+                {{ category.name }}
               </span>
             </div>
 
             <!-- Book Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div class="space-y-3">
                 <div class="flex items-center">
                   <span class="font-semibold text-gray-700 w-20">ISBN:</span>
@@ -102,16 +103,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="grid grid-cols-1 md:grid-cols gap-4">
-              <button class="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center" :class="{'opacity-50 cursor-not-allowed': bookItems.length === 0}" :disabled="bookItems.length === 0">
-                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 16.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                Borrow Book
-              </button>
-            </div>
           </div>
 
           <!-- Book Description -->
@@ -119,7 +110,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Description</h2>
             <p class="text-gray-700 leading-relaxed mb-4">
               This is an excellent book that provides comprehensive coverage of its subject matter. 
-              The author {{ book.authorName }} presents the material in an engaging and accessible way, 
+              The author {{ book.author.name }} presents the material in an engaging and accessible way, 
               making it suitable for both beginners and advanced readers.
             </p>
             <p class="text-gray-700 leading-relaxed">
@@ -146,6 +137,11 @@
                 </div>
                 <span class="text-green-700 font-semibold">{{ bookItems.length }} copies available</span>
 
+              </div>
+
+              <div v-if="bookItems.length > 0" class="text-sm text-center text-gray-600">
+                <div class="font-medium">Want to borrow this book?</div>
+                <div>Please visit the library or contact a librarian to create a borrowing for you.</div>
               </div>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
@@ -186,10 +182,10 @@
                 :alt="relatedBook.title"
                 class="w-full h-64 object-cover rounded-md mb-3 group-hover:scale-105 transition-transform duration-200"
               />
-              <h3 class="font-semibold text-sm line-clamp-2 group-hover:text-blue-600 mb-2">
+              <h3 class="text-lg font-semibold line-clamp-2 group-hover:text-blue-600 mb-2">
                 {{ relatedBook.title }}
               </h3>
-              <p class="text-sm text-gray-600 mb-2">{{ relatedBook.authorName }}</p>
+              <p class="text-sm text-gray-600 mb-2">{{ relatedBook.author.name }}</p>
               <button class="w-full bg-blue-100 text-blue-800 py-2 px-3 rounded text-sm hover:bg-blue-200 transition-colors">
                 View Details
               </button>
@@ -198,13 +194,25 @@
         </div>
       </div>
     </div>
+    <!-- Success/Error Messages -->
+    <div v-if="message" class="fixed bottom-4 right-4 z-50">
+      <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        {{ message }}
+      </div>
+    </div>
+
+    <div v-if="errorMessage" class="fixed bottom-4 right-4 z-50">
+      <div class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        {{ errorMessage }}
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getBook, getBookItemsByBook, getAllBooks } from '../api'
+import { getBook, getBookItemsByBook, getAllBooks, createBorrowingRequest } from '../../api'
 
 // Router instances
 const route = useRoute()
@@ -215,13 +223,20 @@ const loading = ref(true)
 const book = ref(null)
 const bookItems = ref([])
 const relatedBooks = ref([])
-
+const message = ref('')
+const errorMessage = ref('')
 // Load related books
 const loadRelatedBooks = async () => {
   try {
     const response = await getAllBooks()
     relatedBooks.value = response.data.data.filter(
-      b => b.id !== book.value.id && b.categoryNames.some(cat => book.value.categoryNames.includes(cat))
+      b =>
+        b.id !== book.value.id &&
+        b.categories.some(cat =>
+          book.value.categories.some(selected =>
+            selected.name === cat.name
+          )
+        )
     ).slice(0, 4)
   } catch (error) {
     console.error('Error loading related books:', error)
@@ -257,7 +272,7 @@ const loadBookItems = async () => {
 }
 
 const viewBook = (book) => {
-  router.push(`/book/${book.id}`)
+  router.push(`/books/${book.id}`)
 }
 
 watch(() => route.params.id, () => {

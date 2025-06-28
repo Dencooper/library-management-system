@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Import components
 import HomePage from '@/views/HomePage.vue'
-import BookDetail from '@/views/BookDetail.vue'
+import BookDetail from '@/views/user/BookDetail.vue'
 
 // Auth pages
 import LoginPage from '@/views/auth/LoginPage.vue'
@@ -11,10 +11,9 @@ import RegisterPage from '@/views/auth/RegisterPage.vue'
 
 // USER pages
 import ProfilePage from '@/views/user/ProfilePage.vue'
-import BorrowBookPage from '@/views/user/BorrowBookPage.vue'
-import MyBorrowingRequestsPage from '@/views/user/MyBorrowingRequestsPage.vue'
+import BorrowBookPage from '@/views/user/BookPage.vue'
 import MyBorrowingsPage from '@/views/user/MyBorrowingsPage.vue'
-import ReturnBookPage from '@/views/user/ReturnBookPage.vue'
+import MyPenaltiesPage from '@/views/user/MyPenaltiesPage.vue'
 
 // // LIBRARIAN pages
 // import LibrarianDashboard from '@/views/librarian/LibrarianDashboard.vue'
@@ -22,15 +21,16 @@ import BooksManagementPage from '@/views/librarian/BooksManagementPage.vue'
 import BookItemsManagementPage from '@/views/librarian/BookItemsManagementPage.vue'
 import ShelvesManagementPage from '@/views/librarian/ShelvesManagementPage.vue'
 import BorrowingsManagementPage from '@/views/librarian/BorrowingsManagamentPage.vue'
-import BorrowingRequestsManagementPage from '@/views/librarian/BorrowingRequestsManagementPage.vue'
 import PenaltiesManagementPage from '@/views/librarian/PenaltiesManagementPage.vue'
 // import ReportsPage from '@/views/librarian/ReportsPage.vue'
 
 // // ADMIN pages
-// import AdminDashboard from '@/views/admin/AdminDashboard.vue'
-// import ManageUsersPage from '@/views/admin/ManageUsersPage.vue'
-// import ManageLibrariansPage from '@/views/admin/ManageLibrariansPage.vue'
-// import SystemSettingsPage from '@/views/admin/SystemSettingsPage.vue'
+import BooksManagementPageAdmin from '@/views/admin/BooksManagementPage.vue'
+import BookItemsManagementPageAdmin from '@/views/admin/BookItemsManagementPage.vue'
+import ShelvesManagementPageAdmin from '@/views/admin/ShelvesManagementPage.vue'
+import BorrowingsManagementPageAdmin from '@/views/admin/BorrowingsManagamentPage.vue'
+import PenaltiesManagementPageAdmin from '@/views/admin/PenaltiesManagementPage.vue'
+import AccountsManagementPageAdmin from '@/views/admin/AccountManagementPage.vue'
 
 const routes = [
   // Public routes
@@ -40,7 +40,7 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/book/:id',
+    path: '/books/:id',
     name: 'BookDetail',
     component: BookDetail
   },
@@ -67,15 +67,9 @@ const routes = [
     meta: { requiresAuth: true, role: 'USER' }
   },
   {
-    path: '/borrow',
-    name: 'borrow',
+    path: '/books',
+    name: 'books',
     component: BorrowBookPage,
-    meta: { requiresAuth: true, role: 'USER' }
-  },
-  {
-    path: '/my-borrowing-requests',
-    name: 'my-borrowing-requests',
-    component: MyBorrowingRequestsPage,
     meta: { requiresAuth: true, role: 'USER' }
   },
   {
@@ -85,9 +79,9 @@ const routes = [
     meta: { requiresAuth: true, role: 'USER' }
   },
   {
-    path: '/return',
-    name: 'return',
-    component: ReturnBookPage,
+    path: '/my-penalties',
+    name: 'my-penalties',
+    component: MyPenaltiesPage,
     meta: { requiresAuth: true, role: 'USER' }
   },
   
@@ -123,17 +117,11 @@ const routes = [
     meta: { requiresAuth: true, role: 'LIBRARIAN' }
   },
   {
-    path: '/librarian/borrowing-requests',
-    name: 'librarian-borrowing-requests',
-    component: BorrowingRequestsManagementPage,
-    meta: { requiresAuth: true, role: 'LIBRARIAN' }
-  },
-  {
     path: '/librarian/penalties',
     name: 'librarian-penalties',
     component: PenaltiesManagementPage,
     meta: { requiresAuth: true, role: 'LIBRARIAN' }
-  }
+  },
   // {
   //   path: '/librarian/reports',
   //   name: 'librarian-reports',
@@ -141,31 +129,49 @@ const routes = [
   //   meta: { requiresAuth: true, role: 'LIBRARIAN' }
   // },
   
-  // // ADMIN routes
+  // ADMIN routes
   // {
   //   path: '/admin/dashboard',
   //   name: 'admin-dashboard',
   //   component: AdminDashboard,
   //   meta: { requiresAuth: true, role: 'ADMIN' }
   // },
-  // {
-  //   path: '/admin/users',
-  //   name: 'admin-users',
-  //   component: ManageUsersPage,
-  //   meta: { requiresAuth: true, role: 'ADMIN' }
-  // },
-  // {
-  //   path: '/admin/librarians',
-  //   name: 'admin-librarians',
-  //   component: ManageLibrariansPage,
-  //   meta: { requiresAuth: true, role: 'ADMIN' }
-  // },
-  // {
-  //   path: '/admin/settings',
-  //   name: 'admin-settings',
-  //   component: SystemSettingsPage,
-  //   meta: { requiresAuth: true, role: 'ADMIN' }
-  // }
+  {
+    path: '/admin/accounts',
+    name: 'admin-accounts',
+    component: AccountsManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/books',
+    name: 'admin-books',
+    component: BooksManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/book-items',
+    name: 'admin-book-items',
+    component: BookItemsManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/shelves',
+    name: 'admin-shelves',
+    component: ShelvesManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/borrowings',
+    name: 'admin-borrowings',
+    component: BorrowingsManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/penalties',
+    name: 'admin-penalties',
+    component: PenaltiesManagementPageAdmin,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
 ]
 
 const router = createRouter({

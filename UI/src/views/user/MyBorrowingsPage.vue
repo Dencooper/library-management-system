@@ -5,26 +5,15 @@
       <div class="flex items-center justify-between mb-8">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">My Borrowings</h1>
-          <p class="text-gray-600 mt-2">View your borrowed books and return dates</p>
+          <p class="text-gray-600 mt-2">Track your borrowed books and return dates</p>
         </div>
       </div>
 
       <!-- Status Summary -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div class="bg-white rounded-lg shadow p-6 flex items-center">
-          <div class="rounded-full bg-blue-100 p-3 mr-4">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm text-gray-600">Active Borrowings</p>
-            <p class="text-2xl font-bold text-gray-900">{{ activeCount }}</p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6 flex items-center">
           <div class="rounded-full bg-red-100 p-3 mr-4">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6   text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -42,6 +31,17 @@
           <div>
             <p class="text-sm text-gray-600">Returned</p>
             <p class="text-2xl font-bold text-gray-900">{{ returnedCount }}</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 flex items-center">
+          <div class="rounded-full bg-yellow-100 p-3 mr-4">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Late</p>
+            <p class="text-2xl font-bold text-gray-900">{{ lateCount }}</p>
           </div>
         </div>
       </div>
@@ -70,9 +70,9 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Status</option>
-              <option value="active">Active</option>
               <option value="overdue">Overdue</option>
               <option value="returned">Returned</option>
+              <option value="late">Late</option>
             </select>
           </div>
 
@@ -85,8 +85,8 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="borrowedAt">Borrow Date</option>
-              <option value="dueDate">Due Date</option>
               <option value="returnedAt">Return Date</option>
+              <option value="dueDate">Due Date</option>
             </select>
           </div>
         </div>
@@ -292,10 +292,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { getMyAllBorrowings } from '@/api'
-
-const router = useRouter()
 
 // State
 const borrowings = ref([])
@@ -340,7 +337,6 @@ const filteredBorrowings = computed(() => {
       const dueDateB = getDueDate(b.borrowedAt)
       return new Date(dueDateA) - new Date(dueDateB)
     } else if (sortBy.value === 'returnedAt') {
-      // Sort null returnedAt to the end
       if (!a.returnedAt && !b.returnedAt) return 0
       if (!a.returnedAt) return 1
       if (!b.returnedAt) return -1
@@ -352,8 +348,8 @@ const filteredBorrowings = computed(() => {
   return filtered
 })
 
-const activeCount = computed(() => 
-  borrowings.value.filter(b => !b.returnedAt && !b.isLate).length
+const lateCount = computed(() => 
+  borrowings.value.filter(b => b.returnedAt && b.isLate).length
 )
 
 const overdueCount = computed(() => 
@@ -394,30 +390,37 @@ const getDueDateClass = (borrowing) => {
   const now = new Date()
   const daysDiff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
   
-  if (daysDiff < 0) return 'text-red-600 font-medium' // Overdue
-  if (daysDiff <= 3) return 'text-yellow-600 font-medium' // Due soon
+  if (daysDiff < 0) return 'text-red-600' // Overdue
+  if (daysDiff <= 3) return 'text-yellow-600' // Due soon
   return 'text-gray-900' // Normal
 }
 
 const getBorrowingStatus = (borrowing) => {
-  if (borrowing.returnedAt) return 'Returned'
+  if (borrowing.returnedAt) {
+    if(borrowing.isLate) {
+      return 'Late'
+    } 
+    return 'Returned'
+  } 
   if (borrowing.isLate) return 'Overdue'
   return 'Active'
 }
 
 const getBorrowingStatusClass = (borrowing) => {
-  if (borrowing.returnedAt) return 'bg-green-100 text-green-800'
+  if (borrowing.returnedAt) {
+    if (borrowing.isLate) return 'bg-red-100 text-red-800'
+    return 'bg-green-100 text-green-800'  
+  }
   if (borrowing.isLate) return 'bg-red-100 text-red-800'
   return 'bg-blue-100 text-blue-800'
 }
 
 const getConditionClass = (condition) => {
   const classes = {
-    'NEW': 'text-green-600',
-    'GOOD': 'text-blue-600',
-    'FAIR': 'text-yellow-600',
-    'POOR': 'text-orange-600',
-    'DAMAGED': 'text-red-600'
+    'GOOD': 'text-green-600',
+    'MINOR_DAMAGE': 'text-yellow-600',
+    'MAJOR_DAMAGE': 'text-red-600',
+    'LOST': 'text-red-800'
   }
   return classes[condition] || 'text-gray-600'
 }

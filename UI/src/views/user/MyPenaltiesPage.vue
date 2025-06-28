@@ -4,89 +4,20 @@
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Penalties Management</h1>
-          <p class="text-gray-600 mt-2">View and manage late return penalties</p>
-        </div>
-        <div class="flex items-center space-x-4">
-          <!-- Summary Stats -->
-          <div class="flex items-center space-x-4 text-sm">
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
-              <span>{{ unpaidCount }} Unpaid</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-              <span>{{ paidCount }} Paid</span>
-            </div>
-            <div class="flex items-center">
-              <span class="text-gray-600">Total: ${{ totalAmount.toFixed(2) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search by user name, borrowing ID, or description..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              @input="filterPenalties"
-            />
-          </div>
-
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Status</label>
-            <select
-              v-model="selectedStatus"
-              @change="filterPenalties"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
-
-          <!-- Amount Range -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Amount Range</label>
-            <select
-              v-model="amountRange"
-              @change="filterPenalties"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Amounts</option>
-              <option value="0-10">$0 - $10</option>
-              <option value="10-25">$10 - $25</option>
-              <option value="25-50">$25 - $50</option>
-              <option value="50+">$50+</option>
-            </select>
-          </div>
+          <h1 class="text-3xl font-bold text-gray-900">My Penalties</h1>
+          <p class="text-gray-600 mt-2">View my penalties detail</p>
         </div>
       </div>
 
       <!-- Penalties Table -->
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">
-            Penalties ({{ filteredPenalties.length }})
-          </h2>
-        </div>
-
         <!-- Loading -->
         <div v-if="isLoading" class="flex justify-center py-12">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
 
         <!-- Table -->
-        <div v-else-if="filteredPenalties.length > 0" class="overflow-x-auto">
+        <div v-else-if="penalties.length > 0" class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -115,7 +46,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="penalty in filteredPenalties"
+                v-for="penalty in penalties"
                 :key="penalty.id"
                 class="hover:bg-gray-50"
               >
@@ -158,12 +89,6 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end space-x-2">
                     <button
-                      @click="editPenalty(penalty)"
-                      class="text-green-600 hover:text-green-800"
-                    >
-                      Edit
-                    </button>
-                    <button
                       @click="viewPenaltyDetails(penalty)"
                       class="text-blue-600 hover:text-blue-900"
                     >
@@ -183,90 +108,6 @@
           </svg>
           <h3 class="text-lg font-medium text-gray-900 mb-2">No penalties found</h3>
           <p class="text-gray-600">Try adjusting your search criteria</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Penalty Modal -->
-    <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto" @click="closeModal">
-      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div @click.stop class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <form @submit.prevent="savePenalty">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">
-                Edit Penalty #{{ penaltyForm.id }}
-              </h3>
-              
-              <div class="space-y-4">
-                <!-- Read-only Info -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span class="text-gray-500">User:</span>
-                      <div class="font-medium">{{ selectedPenalty?.user.fullName }}</div>
-                    </div>
-                    <div>
-                      <span class="text-gray-500">Borrowing:</span>
-                      <div class="font-medium">#{{ selectedPenalty?.borrowingId }}</div>
-                    </div>
-                    <div>
-                      <span class="text-gray-500">Amount:</span>
-                      <div class="font-bold text-red-600">${{ selectedPenalty?.amount.toFixed(2) }}</div>
-                    </div>
-                    <div>
-                      <span class="text-gray-500">Date:</span>
-                      <div class="font-medium">{{ formatDate(selectedPenalty?.penaltyAt) }}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Editable Fields -->
-                <!-- Description -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    v-model="penaltyForm.description"
-                    rows="3"
-                    required
-                    placeholder="Penalty description..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  ></textarea>
-                </div>
-                <!-- Payment Status -->
-                <div v-if="!penaltyForm.isPaid">
-                  <div>
-                    <label class="flex items-center">
-                      <input
-                        v-model="penaltyForm.isPaid"
-                        type="checkbox"
-                        class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span class="ml-3 text-base text-gray-700">Mark as paid</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="submit"
-                :disabled="isSaving"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-              >
-                {{ isSaving ? 'Saving...' : 'Update' }}
-              </button>
-              <button
-                @click="closeModal"
-                type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
@@ -362,12 +203,6 @@
           
           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
-              @click="editPenalty(selectedPenalty)"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Edit
-            </button>
-            <button
               @click="closeDetailsModal"
               type="button"
               class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
@@ -396,83 +231,21 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { getAllPenalties, getBorrowingById, updatePenalty } from '@/api'
+import { getMyAllPenalties} from '@/api'
 
 // State
 const penalties = ref([])
 const isLoading = ref(true)
-const isSaving = ref(false)
-const showEditModal = ref(false)
 const showDetailsModal = ref(false)
 const selectedPenalty = ref(null)
-const searchQuery = ref('')
-const selectedStatus = ref('')
-const amountRange = ref('')
 const message = ref('')
 const errorMessage = ref('')
-
-const penaltyForm = reactive({
-  id: null,
-  description: '',
-  isPaid: false
-})
-
-// Computed
-const filteredPenalties = computed(() => {
-  let filtered = penalties.value
-
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(penalty =>
-      penalty.user.fullName.toLowerCase().includes(query) ||
-      penalty.user.email.toLowerCase().includes(query) ||
-      penalty.description.toLowerCase().includes(query) ||
-      penalty.borrowingId.toString().includes(query)
-    )
-  }
-
-  // Filter by status
-  if (selectedStatus.value) {
-    if (selectedStatus.value === 'paid') {
-      filtered = filtered.filter(penalty => penalty.paid)
-    } else if (selectedStatus.value === 'unpaid') {
-      filtered = filtered.filter(penalty => !penalty.isPaid)
-    }
-  }
-
-  // Filter by amount range
-  if (amountRange.value) {
-    filtered = filtered.filter(penalty => {
-      const amount = penalty.amount
-      if (amountRange.value === '0-10') return amount >= 0 && amount <= 10
-      if (amountRange.value === '10-25') return amount > 10 && amount <= 25
-      if (amountRange.value === '25-50') return amount > 25 && amount <= 50
-      if (amountRange.value === '50+') return amount > 50
-      return true
-    })
-  }
-
-  return filtered.sort((a, b) => new Date(b.penaltyAt) - new Date(a.penaltyAt))
-})
-
-const unpaidCount = computed(() => 
-  penalties.value.filter(p => !p.isPaid).length
-)
-
-const paidCount = computed(() => 
-  penalties.value.filter(p => p.isPaid).length
-)
-
-const totalAmount = computed(() => 
-  penalties.value.reduce((sum, p) => sum + p.amount, 0)
-)
 
 // Methods
 const fetchPenalties = async () => {
   try {
     isLoading.value = true
-    const response = await getAllPenalties()
+    const response = await getMyAllPenalties()
     penalties.value = response.data.data
   } catch (error) {
     console.error('Error fetching penalties:', error)
@@ -502,57 +275,6 @@ const viewPenaltyDetails = async (penalty) => {
     borrowing: borrowing,
   }
   showDetailsModal.value = true
-}
-
-const editPenalty = (penalty) => {
-  selectedPenalty.value = penalty
-  penaltyForm.id = penalty.id
-  penaltyForm.description = penalty.description
-  penaltyForm.isPaid = penalty.paid
-  
-  showDetailsModal.value = false
-  showEditModal.value = true
-}
-
-const savePenalty = async () => {
-  try {
-    isSaving.value = true
-    
-    const response = await updatePenalty(penaltyForm.id, {
-      description: penaltyForm.description,
-      isPaid: penaltyForm.isPaid
-    })
-    const updatedPenalty = response.data.data
-    
-    const index = penalties.value.findIndex(p => p.id === penaltyForm.id)
-    if (index !== -1) {
-      penalties.value[index] = {
-        ...penalties.value[index],
-        ...updatedPenalty,
-      }
-    }
-    
-    message.value = 'Penalty updated successfully'
-    closeModal()
-    setTimeout(() => message.value = '', 3000)
-    
-  } catch (error) {
-    console.error('Error saving penalty:', error)
-    errorMessage.value = 'Failed to save penalty'
-    setTimeout(() => errorMessage.value = '', 3000)
-  } finally {
-    isSaving.value = false
-  }
-}
-
-const closeModal = () => {
-  showEditModal.value = false
-  selectedPenalty.value = null
-  
-  // Reset form
-  penaltyForm.id = null
-  penaltyForm.description = ''
-  penaltyForm.isPaid = false
 }
 
 const closeDetailsModal = () => {

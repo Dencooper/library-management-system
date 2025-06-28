@@ -13,7 +13,7 @@
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link
               v-if="authStore.isAuthenticated"
-              to="/borrow"
+              to="/books"
               class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Browse Books
@@ -25,9 +25,6 @@
             >
               Get Started
             </router-link>
-            <button class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-              Learn More
-            </button>
           </div>
         </div>
       </div>
@@ -82,18 +79,18 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-gray-200 rounded-lg shadow-sm p-6 text-center">
           <div class="text-3xl mb-2">📚</div>
-          <h3 class="text-2xl font-bold text-gray-900">{{ bookItems.length }}</h3>
-          <p class="text-gray-600">Borrow Books</p>
+          <h3 class="text-2xl font-bold text-gray-900">{{ books }}</h3>
+          <p class="text-gray-600">Books</p>
         </div>
         <div class="bg-gray-200 rounded-lg shadow-sm p-6 text-center">
           <div class="text-3xl mb-2">👥</div>
           <h3 class="text-2xl font-bold text-gray-900">{{ members }}</h3>
-          <p class="text-gray-600">Active Members</p>
+          <p class="text-gray-600">Users</p>
         </div>
         <div class="bg-gray-200 rounded-lg shadow-sm p-6 text-center">
           <div class="text-3xl mb-2">📖</div>
-          <h3 class="text-2xl font-bold text-gray-900">567</h3>
-          <p class="text-gray-600">Books Borrowed This Month</p>
+          <h3 class="text-2xl font-bold text-gray-900">{{ borrowings }}</h3>
+          <p class="text-gray-600">Borrowings</p>
         </div>
       </div>
     </div>
@@ -134,11 +131,11 @@
                 </div>
                 <div class="absolute top-2 left-2">
                   <span
-                    v-for="category in Array.from(book.categoryNames).slice(0, 1)"
+                    v-for="category in Array.from(book.categories).slice(0, 1)"
                     :key="category"
                     class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
                   >
-                    {{ category }}
+                    {{ category.name }}
                   </span>
                 </div>
               </div>
@@ -150,7 +147,7 @@
                   <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  {{ book.authorName }}
+                  {{ book.author.name }}
                 </p>
                 <p class="text-xs text-gray-500">ISBN: {{ book.isbn }}</p>
                 <div class="flex items-center justify-between pt-2">
@@ -166,7 +163,7 @@
 
         <div class="text-center mt-12">
           <router-link
-            to="/borrow"
+            to="/books"
             class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             View All Books
@@ -184,7 +181,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { getAllBooks, getAllBookItems, getUserQuantity } from '@/api'
+import { getAllBooks, getUserQuantity, getBorrowingQuantity } from '@/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -193,6 +190,8 @@ const authStore = useAuthStore()
 const featuredBooks = ref([])
 const bookItems = ref([])
 const members = ref(0)
+const books = ref(0)
+const borrowings = ref(0)
 const isLoading = ref(true)
 
 // Methods
@@ -202,20 +201,9 @@ const fetchFeaturedBooks = async () => {
     const response = await getAllBooks()
     // Get first 5 books as featured
     featuredBooks.value = response.data.data.slice(0, 4)
+    books.value = response.data.data.length
   } catch (error) {
     console.error('Error fetching featured books:', error)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const fetchBookItems = async () => {
-  try {
-    isLoading.value = true
-    const response = await getAllBookItems()
-    bookItems.value = response.data.data
-  } catch (error) {
-    console.error('Error fetching book items:', error)
   } finally {
     isLoading.value = false
   }
@@ -233,6 +221,18 @@ const fetchUserQuantity = async () => {
   }
 }
 
+const fetchBorrowingQuantity = async () => {
+  try {
+    isLoading.value = true
+    const response = await getBorrowingQuantity()
+    borrowings.value = response.data.data
+  } catch (error) {
+    console.error('Error fetching user quantity:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const viewBook = (bookId) => {
   router.push({ name: 'BookDetail', params: { id: bookId } })
 }
@@ -240,7 +240,7 @@ const viewBook = (bookId) => {
 // Lifecycle
 onMounted(() => {
   fetchFeaturedBooks()
-  fetchBookItems()
   fetchUserQuantity()
+  fetchBorrowingQuantity()
 })
 </script>

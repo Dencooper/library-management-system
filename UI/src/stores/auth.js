@@ -79,6 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       // Response structure: { id, fullName, email, phone, address, role }
       user.value = response.data.data
+      console.log(user.value);
     } catch (error) {
       console.error('Fetch user error:', error)
       // If token is invalid, logout

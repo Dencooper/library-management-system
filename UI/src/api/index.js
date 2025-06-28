@@ -149,6 +149,11 @@ export const updateBookImage = async (id, imageFile) => {
   return response;
 };
 
+export const getBookQuantity = async () => {
+  const response = await api.get('/books/quantity');
+  return response;
+};
+
 //Book Item API
 export const createBookItem = async (data) => {
   try {
@@ -167,6 +172,11 @@ export const getAllBookItems = async (isAvailable) => {
 
 export const getBookItemById = async (id) => {
   const response = await api.get(`/book-items/${id}`);
+  return response;
+};
+
+export const getBookItemByCode = async (code) => {
+  const response = await api.get('/book-items/code', { params: { code } });
   return response;
 };
 
@@ -294,6 +304,10 @@ export const getMyAllBorrowings = async () => {
   return response;
 };
 
+export const getBorrowingQuantity = async () => {
+  const response = await api.get('/borrowings/quantity');
+  return response;
+};  
 
 export const returnBook = async (data) => {
   console.log(data);
@@ -312,11 +326,10 @@ export const getAllPenalties = async () => {
   return response;
 };
 
-export const getPenaltiesByUser = async (email) => {
-  const response = await api.get('/penalties/user', { params: { email } });
+export const getMyAllPenalties = async () => {
+  const response = await api.get('/penalties/user');
   return response;
 };
-
 
 export const updatePenalty = async (id, data) => {
   const response = await api.patch(`/penalties/${id}`, data);
