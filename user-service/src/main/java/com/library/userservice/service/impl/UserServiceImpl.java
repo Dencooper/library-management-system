@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,16 +34,17 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse createUser(UserRequest request) {
-        if (request.getRole().equals(Role.LIBRARIAN)){
-            RegisterRequest registerRequest = RegisterRequest.builder()
-                    .email(request.getEmail())
-                    .password("Librarian@123")
-                    .fullName(request.getFullName())
-                    .phone(request.getPhone())
-                    .address(request.getAddress())
-                    .build();
-            authFeignClient.addAccount(registerRequest);
+        if(userRepository.existsByEmailAndIsDeletedFalse(request.getEmail())) {
+            throw new RuntimeException("Email is existed");
         }
+        RegisterRequest registerRequest = RegisterRequest.builder()
+                .email(request.getEmail())
+                .password(request.getRole().equals(Role.LIBRARIAN) ? "Librarian@123" : "User@123")
+                .fullName(request.getFullName())
+                .phone(request.getPhone())
+                .address(request.getAddress())
+                .build();
+        authFeignClient.addAccount(registerRequest);
         User user = userMapper.toEntity(request);
         return userMapper.toResponse(userRepository.save(user));
     }
@@ -69,6 +72,7 @@ public class UserServiceImpl implements IUserService {
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new RuntimeException("User not found or already deleted"));
+
         return userMapper.toResponse(user);
     }
 
@@ -94,10 +98,18 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    @PostAuthorize("returnObject.email == authentication.name")
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("User not found or already deleted"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !user.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("You are not authorized to update this user.");
+        }
         user = userMapper.updateUser(user, request);
         return userMapper.toResponse(userRepository.save(user));
     }
@@ -117,5 +129,14 @@ public class UserServiceImpl implements IUserService {
     @Transactional(readOnly = true)
     public Long getUserQuantity() {
         return userRepository.count();
+    }
+
+    @Override
+    public Void updateBannedUser(Long id, Boolean isBanned) {
+        User user = userRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("User not found or already deleted"));
+        user.setBanned(isBanned);
+        userRepository.save(user);
+        return null;
     }
 }

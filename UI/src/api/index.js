@@ -108,7 +108,12 @@ export const updateUser = async (id, data) => {
 };
 
 export const updateDeleteStatus = async (id, isDeleted) => {
-  const response = await api.patch(`/users/${id}/status`, {params: { isDeleted }});
+  const response = await api.patch(`/users/${id}/status`, null, {params: { isDeleted }});
+  return response;
+};
+
+export const updateBannedUser = async (id, isBanned) => {
+  const response = await api.patch(`/users/${id}/ban`, null, {params: { isBanned }});
   return response;
 };
 
@@ -242,46 +247,10 @@ export const updateShelfStatus = async (id, isDeleted) => {
   return response;
 };
 
-// Borrowing Request API
-export const createBorrowingRequest = async (data) => {
-  try {
-    const response = await api.post('/borrowing-requests', data);
-    return response;
-  } catch (error) {
-    console.error('Error creating borrowing request:', error);
-    return null;
-  }
-};
-
-export const getBorrowingRequestById = async (id) => {
-  const response = await api.get(`/borrowing-requests/${id}`);
-  return response;
-};
-
-export const getAllBorrowingRequests = async () => {
-  const response = await api.get('/borrowing-requests');
-  return response;
-};
-
-export const getMyAllBorrowingRequests = async () => {
-  const response = await api.get('/borrowing-requests/user');
-  return response;
-};
-
-export const updateBorrowingRequest = async (id, data) => {
-  const response = await api.patch(`/borrowing-requests/${id}`, data);
-  return response;
-};
-
 // Borrowing API
 export const createBorrowing = async (data) => {
-  try {
-    const response = await api.post('/borrowings', data);
-    return response;
-  } catch (error) {
-    console.error('Error creating borrowing:', error);
-    return null;
-  }
+  const response = await api.post('/borrowings', data);
+  return response;
 };
 
 export const getBorrowingById = async (id) => {
@@ -326,8 +295,8 @@ export const getAllPenalties = async () => {
   return response;
 };
 
-export const getMyAllPenalties = async () => {
-  const response = await api.get('/penalties/user');
+export const getUserAllPenalties = async (id) => {
+  const response = await api.get(`/penalties/user/${id}`);
   return response;
 };
 

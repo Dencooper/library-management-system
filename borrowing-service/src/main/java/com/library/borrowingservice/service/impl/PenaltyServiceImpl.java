@@ -26,8 +26,7 @@ public class PenaltyServiceImpl implements IPenaltyService {
     private final PenaltyRepository penaltyRepository;
     private final BorrowingRepository borrowingRepository;
     private final PenaltyMapper penaltyMapper;
-    private final BorrowingMapper borrowingMapper;
-    private final AuthFeignClient authFeignClient;
+    private final UsersFeignClient usersFeignClient;
 
     @Override
     @Transactional
@@ -41,6 +40,9 @@ public class PenaltyServiceImpl implements IPenaltyService {
                 .isPaid(false)
                 .borrowing(borrowing)
                 .build();
+        if(getPenaltiesByUserId(borrowing.getUserId()).size() >= 2){
+            usersFeignClient.updateBannedUser(borrowing.getUserId(), true);
+        }
         return penaltyMapper.toResponse(penaltyRepository.save(penalty));
     }
 
@@ -63,8 +65,8 @@ public class PenaltyServiceImpl implements IPenaltyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PenaltyResponse> getUserPenalties() {
-        List<Borrowing> borrowings = borrowingRepository.findAllByUserId(authFeignClient.fetchUser().getBody().getData().getId());
+    public List<PenaltyResponse> getPenaltiesByUserId(Long id) {
+        List<Borrowing> borrowings = borrowingRepository.findAllByUserId(id);
         return  penaltyRepository.findAllByBorrowingIn(borrowings)
                 .stream()
                 .map(penaltyMapper::toResponse)

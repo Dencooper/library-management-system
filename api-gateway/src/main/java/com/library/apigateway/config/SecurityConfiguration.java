@@ -59,7 +59,8 @@ public class SecurityConfiguration {
                 "/api/v1/auth/register",
                 "/api/v1/auth/login",
                 "/api/v1/auth/refresh",
-                "/api/v1/users/quantity"
+                "/api/v1/users/quantity",
+                "/api/v1/borrowings/quantity"
         };
 
         return http

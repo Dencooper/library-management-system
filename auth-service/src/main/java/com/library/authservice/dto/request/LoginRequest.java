@@ -1,5 +1,6 @@
 package com.library.authservice.dto.request;
 
+import com.library.authservice.utils.validator.StrongPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,6 +19,6 @@ public class LoginRequest {
     String email;
 
     @NotNull
-    @Size(min = 6, message = "PASSWORD_INVALID")
+    @StrongPassword(message = "PASSWORD_INVALID")
     String password;
 }

@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Import components
 import HomePage from '@/views/HomePage.vue'
-import BookDetail from '@/views/user/BookDetail.vue'
+import BookDetail from '@/views/BookDetail.vue'
 
 // Auth pages
 import LoginPage from '@/views/auth/LoginPage.vue'
@@ -11,7 +11,7 @@ import RegisterPage from '@/views/auth/RegisterPage.vue'
 
 // USER pages
 import ProfilePage from '@/views/user/ProfilePage.vue'
-import BorrowBookPage from '@/views/user/BookPage.vue'
+import BorrowBookPage from '@/views/BookPage.vue'
 import MyBorrowingsPage from '@/views/user/MyBorrowingsPage.vue'
 import MyPenaltiesPage from '@/views/user/MyPenaltiesPage.vue'
 
@@ -40,12 +40,17 @@ const routes = [
     component: HomePage
   },
   {
+    path: '/books',
+    name: 'books',
+    component: BorrowBookPage,
+  },
+  {
     path: '/books/:id',
     name: 'BookDetail',
     component: BookDetail
   },
   
-  // Auth routes
+  // Auth routesx`
   {
     path: '/login',
     name: 'login',
@@ -64,12 +69,6 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfilePage,
-    meta: { requiresAuth: true, role: 'USER' }
-  },
-  {
-    path: '/books',
-    name: 'books',
-    component: BorrowBookPage,
     meta: { requiresAuth: true, role: 'USER' }
   },
   {

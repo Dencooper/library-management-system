@@ -4,30 +4,18 @@
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Active Borrowings</h1>
-          <p class="text-gray-600 mt-2">Track and manage book borrowings and returns</p>
+          <h1 class="text-3xl font-bold text-gray-900">Borrowing</h1>
+          <p class="text-gray-600 mt-2">Create and manage all book borrowings</p>
         </div>
-        <div class="flex items-center space-x-4">
-          <!-- Status Summary -->
-          <div class="flex items-center space-x-4 text-sm">
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
-              <span>{{ activeCount }} Active</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
-              <span>{{ overdueCount }} Overdue</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-              <span>{{ returnedCount }} Returned</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-red-600 rounded-full mr-2"></div>
-              <span>{{ lateCount }} Late</span>
-            </div>
-          </div>
-        </div>
+        <button
+          @click="showCreateBorrowingModal = true"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Create Borrowing
+        </button>
       </div>
 
       <!-- Filters -->
@@ -44,7 +32,6 @@
               @input="filterBorrowings"
             />
           </div>
-
           <!-- Status Filter -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -60,7 +47,6 @@
               <option value="late">Late</option>
             </select>
           </div>
-
           <!-- Sort -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
@@ -206,6 +192,210 @@
       </div>
     </div>
 
+    <!-- Create Borrowing Modal -->
+    <div v-if="showCreateBorrowingModal" class="fixed inset-0 z-50 overflow-y-auto" @click="closeCreateBorrowingModal">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div @click.stop class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+          <form @submit.prevent="confirmCreateBorrowing">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">
+                Create New Borrowing
+              </h3>
+              
+              <div class="space-y-6">
+                <!-- Librarian Info -->
+                <div>
+                  <label class="block font-medium text-gray-700 mb-2">Librarian</label>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <span class="text-sm text-gray-500">Name:</span>
+                        <div class="font-medium">{{ authStore.user.fullName }}</div>
+                      </div>
+                      <div>
+                        <span class="text-sm text-gray-500">Email:</span>
+                        <div class="font-medium">{{ authStore.user.email }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">User Email</label>
+                    <div class="flex items-center gap-x-2">
+                      <input
+                        v-model="createForm.email"
+                        type="text"
+                        required
+                        placeholder="e.g., user@example.com"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button 
+                        @click.prevent="searchUser"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Check 
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- User Info -->
+                <div v-if="user" class="space-y-4">
+                  <div
+                    class="p-4 rounded-lg shadow-sm"
+                    :class="[
+                      'bg-gray-50 border',
+                      user.isBanned ? 'border-red-500' : 'border-gray-200'
+                    ]"
+                  >
+                    <div class="flex flex-wrap justify-between items-center gap-4">
+                      <div class="flex justify-between items-center gap-4 w-full mb-3">
+                        <div class="text-gray-900">
+                          Name: {{ user.fullName }}
+                        </div>
+                        <div class="text-gray-900">
+                          Phone Number: {{ user.phoneNumber || '...' }}
+                        </div>
+                      </div>
+                      <div class="flex w-full">
+                        <div class="text-gray-900">
+                          Address: {{ user.address || '...' }}
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="user.isBanned" class="mt-2 text-red-600 text-sm font-medium">
+                      ⚠️ This user is banned and cannot borrow books
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Book Selection Section -->
+                <div class="space-y-4">
+                  <label class="block text-sm font-medium text-gray-700">Book Selection</label>
+                  
+                  <!-- Add Book Form -->
+                  <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div class="space-y-3">
+                      <label class="block text-sm font-medium text-gray-700">Add Book by Code</label>
+                      <div class="flex items-center gap-x-2">
+                        <input
+                          v-model="currentBookCode"
+                          type="text"
+                          placeholder="e.g., 9786042130523-001"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          @keyup.enter="addBookItem"
+                        />
+                        <button 
+                          @click.prevent="addBookItem"
+                          :disabled="!currentBookCode.trim()"
+                          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Selected Books List -->
+                  <div v-if="selectedBooks.length > 0" class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <label class="block text-sm font-medium text-gray-700">
+                        Selected Books ({{ selectedBooks.length }})
+                      </label>
+                      <button
+                        @click.prevent="clearAllBooks"
+                        type="button"
+                        class="text-sm text-red-600 hover:text-red-800 bg-transparent border border-red-300 hover:border-red-400 px-3 py-1 rounded-md transition-colors"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    <div class="space-y-2 max-h-60 overflow-y-auto">
+                      <div
+                        v-for="(book, index) in selectedBooks"
+                        :key="book.id"
+                        class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      >
+                        <div class="flex-1">
+                          <div class="font-medium text-gray-900">{{ book.bookTitle }}</div>
+                          <div class="text-sm text-gray-500">Code: {{ book.code }}</div>
+                          <div class="flex items-center gap-4 mt-1">
+                            <span :class="getConditionClass(book.bookItemCondition)" class="text-sm">
+                              {{ getConditionLabel(book.bookItemCondition) }}
+                            </span>
+                            <span class="text-sm font-medium text-gray-900">
+                              ${{ book.price?.toFixed(2) }}
+                            </span>
+                            <span
+                              :class="[
+                                'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                book.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              ]"
+                            >
+                              {{ book.available ? 'Available' : 'Not Available' }}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          @click="removeBookItem(index)"
+                          class="ml-4 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
+                        >
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- No Books Selected Message -->
+                  <div v-else class="text-center py-8 text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
+                    </svg>
+                    <p>No books selected. Add books using their codes above.</p>
+                  </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    v-model="createForm.description"
+                    rows="3"
+                    placeholder="Additional notes or instructions..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <button
+                type="submit"
+                :disabled="!canProcessCreate || isCreatingBorrowing"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isCreatingBorrowing ? 'Creating...' : 'Create Borrowing' }}
+              </button>
+              <button
+                @click="closeCreateBorrowingModal"
+                type="button"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Borrowing Details Modal -->
     <div v-if="showDetailsModal" class="fixed inset-0 z-50 overflow-y-auto" @click="closeDetailsModal">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -248,15 +438,9 @@
                       <div class="font-medium text-gray-900">{{ item.bookTitle }}</div>
                       <div class="text-sm text-gray-500">Code: {{ item.code }}</div>
                       <div class="text-sm text-gray-500">
-                        Borrowed Condition: 
-                        <span :class="getConditionClass(item.borrowedCondition)">
-                          {{ getConditionLabel(item.borrowedCondition) }}
-                        </span>
-                      </div>
-                      <div v-if="item.returnedCondition" class="text-sm text-gray-500">
-                        Returned Condition: 
-                        <span :class="getConditionClass(item.returnedCondition)">
-                          {{ getConditionLabel(item.returnedCondition) }}
+                        Condition: 
+                        <span :class="getConditionClass(item.bookItemCondition)">
+                          {{ getConditionLabel(item.bookItemCondition) }}
                         </span>
                       </div>
                     </div>
@@ -311,13 +495,6 @@
           
           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
-              v-if="!selectedBorrowing?.returnedAt"
-              @click="processReturn(selectedBorrowing)"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Process Return
-            </button>
-            <button
               @click="closeDetailsModal"
               type="button"
               class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
@@ -338,7 +515,7 @@
           <form @submit.prevent="confirmReturn">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <h3 class="text-lg font-medium text-gray-900 mb-4">
-                Process Return - Borrowing #{{ returnBorrowing?.id }}
+                Process Return - Borrowing #{{ selectedBorrowing?.id }}
               </h3>
               
               <div class="space-y-6">
@@ -357,12 +534,29 @@
                   </div>
                 </div>
 
+                <!-- User Info -->
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900 mb-2">Borrower Information</h4>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <span class="text-sm text-gray-500">Name:</span>
+                        <div class="font-medium">{{ selectedBorrowing.user.fullName }}</div>
+                      </div>
+                      <div>
+                        <span class="text-sm text-gray-500">Email:</span>
+                        <div class="font-medium">{{ selectedBorrowing.user.email }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Book Items Condition Check -->
                 <div>
-                  <h4 class="text-lg font-medium text-gray-900 mb-4">Book Items Condition Assessment</h4>
+                  <h4 class="text-lg font-medium text-gray-900 mb-4">Condition Assessment</h4>
                   <div class="space-y-4">
                     <div
-                      v-for="item in returnBorrowing?.items"
+                      v-for="item in selectedBorrowing?.items"
                       :key="item.id"
                       class="border border-gray-200 rounded-lg p-4"
                     >
@@ -372,64 +566,58 @@
                           <p class="text-sm text-gray-500">Code: {{ item.code }}</p>
                           <p class="text-sm text-gray-500">
                             Borrowed Condition: 
-                            <span :class="getConditionClass(item.borrowedCondition)">
-                              {{ getConditionLabel(item.borrowedCondition) }}
+                            <span :class="getConditionClass(item.bookItemCondition)">
+                              {{ getConditionLabel(item.bookItemCondition) }}
                             </span>
                           </p>
                           <p class="text-sm text-gray-500">Price: ${{ item.price?.toFixed(2) }}</p>
                         </div>
                       </div>
-
                       <div class="space-y-4">
                         <!-- Return Condition -->
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Return Condition *
-                          </label>
-                          <select
-                            v-model="returnForm.itemConditions[item.id]"
-                            required
-                            @change="checkPenaltyRequired(item.id)"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="">Select condition</option>
-                            <option value="GOOD">Good - No damage</option>
-                            <option value="MINOR_DAMAGE">Minor Damage - Small wear/tear</option>
-                            <option value="MAJOR_DAMAGE">Major Damage - Significant damage</option>
-                            <option value="LOST">Lost - Book not returned</option>
-                          </select>
-                        </div>
-
-                        <!-- Penalty Description (only for MAJOR_DAMAGE or LOST) -->
-                        <div v-if="needsPenaltyDescription(item.id)">
-                          <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Penalty Description *
-                          </label>
-                          <textarea
-                            v-model="returnForm.penaltyDescriptions"
-                            required
-                            rows="3"
-                            placeholder="Describe the damage or reason for penalty..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          ></textarea>
-                        </div>
-
-                        <!-- Penalty Warning -->
-                        <div v-if="needsPenaltyDescription(item.id)" class="bg-red-50 border border-red-200 rounded-md p-3">
-                          <div class="flex">
-                            <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                            <div>
-                              <h6 class="text-sm font-medium text-red-800">Penalty Required</h6>
-                              <p class="text-sm text-red-700">
-                                A penalty will be automatically calculated and applied for this item based on the condition and damage description.
-                              </p>
-                            </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Return Condition *
+                        </label>
+                        <select
+                          v-model="returnForm.itemConditions[item.id]"
+                          required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select condition</option>
+                          <option value="GOOD">Good - No damage</option>
+                          <option value="MINOR_DAMAGE">Minor Damage - Small wear/tear</option>
+                          <option value="MAJOR_DAMAGE">Major Damage - Significant damage</option>
+                          <option value="LOST">Lost - Book not returned</option>
+                        </select>
+                      </div>
+                    </div>
+                    <!-- Penalty Warning -->
+                    <div v-if="needsPenaltyDescription()" class="bg-red-50 border border-red-200 rounded-md p-3">
+                        <div class="flex">
+                          <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                          <div>
+                            <h6 class="text-sm font-medium text-red-800">Penalty Required</h6>
+                            <p class="text-sm text-red-700">
+                              A penalty will be automatically calculated and applied for this item based on the condition and damage description.
+                            </p>
                           </div>
                         </div>
                       </div>
-                    </div>
+                      <!-- Penalty Description (only for MAJOR_DAMAGE or LOST) -->
+                      <div v-if="needsPenaltyDescription()">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Penalty Description *
+                        </label>
+                        <textarea
+                          v-model="returnForm.penaltyDescriptions"
+                          required
+                          rows="3"
+                          placeholder="Describe the damage or reason for penalty..."
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        ></textarea>
+                      </div>
                   </div>
                 </div>
               </div>
@@ -462,7 +650,6 @@
         {{ message }}
       </div>
     </div>
-
     <div v-if="errorMessage" class="fixed bottom-4 right-4 z-50">
       <div class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
         {{ errorMessage }}
@@ -473,25 +660,35 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
-import { getAllBorrowings, returnBook } from '@/api'
+import { useAuthStore } from '@/stores/auth'
+import { getAllBorrowings, returnBook, getBookItemByCode, getUserByEmail, createBorrowing } from '@/api'
 
-const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
+
 // State
 const borrowings = ref([])
+const selectedBooks = ref([]) // Changed from bookItem to selectedBooks array
+const user = ref(null)
 const isLoading = ref(true)
 const isProcessing = ref(false)
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const sortBy = ref('borrowedAt')
+const showCreateBorrowingModal = ref(false)
 const showDetailsModal = ref(false)
 const showReturnModal = ref(false)
 const selectedBorrowing = ref(null)
-const returnBorrowing = ref(null)
 const message = ref('')
 const errorMessage = ref('')
+const isCreatingBorrowing = ref(false)
+const currentBookCode = ref('') // New field for current book code input
+
+const createForm = reactive({
+  email: '',
+  description: ''
+})
 
 const returnForm = reactive({
   itemConditions: {},
@@ -518,8 +715,8 @@ const filteredBorrowings = computed(() => {
       filtered = filtered.filter(borrowing => !borrowing.returnedAt && !borrowing.isLate)
     } else if (selectedStatus.value === 'overdue') {
       filtered = filtered.filter(borrowing => !borrowing.returnedAt && borrowing.isLate)
-    }else if (selectedStatus.value === 'late') {
-        filtered = filtered.filter(borrowing => borrowing.returnedAt && borrowing.isLate)
+    } else if (selectedStatus.value === 'late') {
+      filtered = filtered.filter(borrowing => borrowing.returnedAt && borrowing.isLate)
     } else if (selectedStatus.value === 'returned') {
       filtered = filtered.filter(borrowing => borrowing.returnedAt && !borrowing.isLate)
     }
@@ -542,43 +739,33 @@ const filteredBorrowings = computed(() => {
   return filtered
 })
 
-const activeCount = computed(() => 
-  borrowings.value.filter(b => !b.returnedAt && !b.isLate).length
-)
-
-const overdueCount = computed(() => 
-  borrowings.value.filter(b => !b.returnedAt && b.isLate).length
-)
-
-const returnedCount = computed(() => 
-  borrowings.value.filter(b => b.returnedAt && !b.isLate).length
-)
-
-const lateCount = computed(() => 
-  borrowings.value.filter(b => b.returnedAt && b.isLate).length
-)
-
 const isLateReturn = computed(() => {
-  if (!returnBorrowing.value) return false
-  const dueDate = getDueDate(returnBorrowing.value.borrowedAt)
+  if (!selectedBorrowing.value) return false
+  const dueDate = getDueDate(selectedBorrowing.value.borrowedAt)
   const now = new Date()
   return now > new Date(dueDate)
 })
 
-const canProcessReturn = computed(() => {
-  if (!returnBorrowing.value) return false
+const canProcessCreate = computed(() => {
+  if (!user.value) return false
+  if (user.value.isBanned) return false
+  if (selectedBooks.value.length === 0) return false
+  
+  // Check if all selected books are available
+  const allAvailable = selectedBooks.value.every(book => book.available)
+  return allAvailable
+})
 
-  const allConditionsSelected = returnBorrowing.value.items.every(item => {
+const canProcessReturn = computed(() => {
+  if (!selectedBorrowing.value) return false
+
+  const allConditionsSelected = selectedBorrowing.value.items.every(item => {
     return returnForm.itemConditions[item.id]
   })
 
   if (!allConditionsSelected) return false
 
-  const anyNeedsPenalty = returnBorrowing.value.items.some(item =>
-    needsPenaltyDescription(item.id)
-  )
-
-  if (anyNeedsPenalty && !returnForm.penaltyDescriptions.trim()) {
+  if( needsPenaltyDescription() && !returnForm.penaltyDescriptions.trim()) {
     return false
   }
 
@@ -598,6 +785,58 @@ const fetchBorrowings = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const searchUser = async () => {
+  user.value = null
+  try {
+    const response = await getUserByEmail(createForm.email)
+    user.value = response.data.data
+  } catch (error) {
+    errorMessage.value = 'No user found with that email'
+    setTimeout(() => errorMessage.value = '', 3000)
+    return
+  }
+}
+
+const addBookItem = async () => {
+  if (!currentBookCode.value.trim()) return
+
+  try {
+    // Check if book is already selected
+    const isAlreadySelected = selectedBooks.value.some(book => book.code === currentBookCode.value.trim())
+    if (isAlreadySelected) {
+      errorMessage.value = 'This book is already selected'
+      setTimeout(() => errorMessage.value = '', 3000)
+      return
+    }
+
+    const response = await getBookItemByCode(currentBookCode.value.trim())
+    const bookItem = response.data.data
+
+    if (!bookItem.available) {
+      errorMessage.value = 'This book is not available for borrowing'
+      setTimeout(() => errorMessage.value = '', 3000)
+      return
+    }
+
+    selectedBooks.value.push(bookItem)
+    currentBookCode.value = '' // Clear the input
+    
+    message.value = 'Book added successfully'
+    setTimeout(() => message.value = '', 2000)
+  } catch (error) {
+    errorMessage.value = 'No matching or available book found with that code'
+    setTimeout(() => errorMessage.value = '', 3000)
+  }
+}
+
+const removeBookItem = (index) => {
+  selectedBooks.value.splice(index, 1)
+}
+
+const clearAllBooks = () => {
+  selectedBooks.value = []
 }
 
 const getDueDate = (borrowedAt) => {
@@ -621,7 +860,7 @@ const getDueDateClass = (borrowing) => {
 
 const getBorrowingStatus = (borrowing) => {
   if (borrowing.returnedAt) {
-    if(borrowing.isLate) {
+    if (borrowing.isLate) {
       return 'Late'
     } 
     return 'Returned'
@@ -659,16 +898,12 @@ const getConditionLabel = (condition) => {
   return labels[condition] || condition
 }
 
-const needsPenaltyDescription = (itemId) => {
-  const condition = returnForm.itemConditions[itemId]
-  return condition === 'MAJOR_DAMAGE' || condition === 'LOST'
-}
-
-const checkPenaltyRequired = () => {
-  if (!returnBorrowing.value?.items.some(item => needsPenaltyDescription(item.id))) {
-    returnForm.penaltyDescriptions = ''
-  }
-}
+const needsPenaltyDescription = () => {
+ return selectedBorrowing.value?.items.some(item => {
+    const condition = returnForm.itemConditions[item.id]
+    return condition === 'MAJOR_DAMAGE' || condition === 'LOST'
+  }) || false
+} 
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -686,39 +921,62 @@ const viewBorrowingDetails = (borrowing) => {
 }
 
 const processReturn = (borrowing) => {
-  returnBorrowing.value = borrowing
-  returnForm.itemConditions = {}
-  returnForm.penaltyDescriptions = '';
-  
+  selectedBorrowing.value = borrowing
   showReturnModal.value = true
-  closeDetailsModal()
+}
+
+const confirmCreateBorrowing = async () => {
+  try {
+    isCreatingBorrowing.value = true
+    const borrowingData = {
+      email: createForm.email,
+      bookItemIds: selectedBooks.value.map(book => book.id), 
+      description: createForm.description || null
+    }
+
+    const response = await createBorrowing(borrowingData)
+    
+    // Add the new borrowing to the list
+    borrowings.value.unshift(response.data.data)
+    
+    message.value = 'Borrowing created successfully!'
+    setTimeout(() => message.value = '', 3000)
+    
+    closeCreateBorrowingModal()
+    
+    // Refresh the borrowings list
+    await fetchBorrowings()
+  } catch (error) {
+    console.error('Error creating borrowing:', error)
+    errorMessage.value = error.response?.data?.message || 'Failed to create borrowing'
+    setTimeout(() => errorMessage.value = '', 3000)
+  } finally {
+    isCreatingBorrowing.value = false
+  }
 }
 
 const confirmReturn = async () => {
   try {
     isProcessing.value = true
-
     const returnData = {
-      id: returnBorrowing.value.id,
-      penaltyDescription: returnForm.penaltyDescriptions
+      borrowingId: selectedBorrowing.value.id,
+      description: returnForm.penaltyDescriptions
           ? returnForm.penaltyDescriptions.trim()
           : null,
-      items: returnBorrowing.value.items.map(item => ({
-        bookItemId: item.bookId,
+      items: selectedBorrowing.value.items.map(item => ({
+        bookItemId: item.id,
         bookItemCondition: returnForm.itemConditions[item.id],
       }))
     }
 
     const response = await returnBook(returnData)
     const data = response.data.data
-
-    const index = borrowings.value.findIndex(b => b.id === returnBorrowing.value.id)
+    const index = borrowings.value.findIndex(b => b.id === selectedBorrowing.value.id)
     if (index !== -1) {
       borrowings.value[index] = {
         ...borrowings.value[index],
         ...data
       }
-
       borrowings.value[index].items.forEach(item => {
         item.available = true
         item.returnedCondition = returnForm.itemConditions[item.id]
@@ -737,6 +995,15 @@ const confirmReturn = async () => {
   }
 }
 
+const closeCreateBorrowingModal = () => {
+  showCreateBorrowingModal.value = false
+  selectedBooks.value = [] // Clear selected books
+  user.value = null
+  createForm.email = ''
+  createForm.description = ''
+  currentBookCode.value = ''
+}
+
 const closeDetailsModal = () => {
   showDetailsModal.value = false
   selectedBorrowing.value = null
@@ -744,26 +1011,26 @@ const closeDetailsModal = () => {
 
 const closeReturnModal = () => {
   showReturnModal.value = false
-  returnBorrowing.value = null
+  selectedBorrowing.value = null
   returnForm.itemConditions = {}
   returnForm.penaltyDescriptions = ''
 }
 
 const handleQueryParams = () => {
-    const email = route.query.email
-    if (email) {
-      searchQuery.value = decodeURIComponent(email)
-    }
+  const email = route.query.email
+  if (email) {
+    searchQuery.value = decodeURIComponent(email)
   }
+}
 
-  // Watch for route changes
-  watch(() => route.query, () => {
-    handleQueryParams()
-  }, { immediate: true })
-  
-  // Lifecycle
-  onMounted(() => {
-    fetchBorrowings()
-    handleQueryParams()
-  })
+// Watch for route changes
+watch(() => route.query, () => {
+  handleQueryParams()
+}, { immediate: true })
+
+// Lifecycle
+onMounted(() => {
+  fetchBorrowings()
+  handleQueryParams()
+})
 </script>

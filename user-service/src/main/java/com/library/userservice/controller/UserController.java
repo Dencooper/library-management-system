@@ -47,6 +47,12 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUser(id, request));
     }
 
+    @PatchMapping("/{id}/ban")
+    public ResponseEntity<Void> updateBanned(@PathVariable Long id, @RequestParam boolean isBanned){
+        userService.updateBannedUser(id, isBanned);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateDeleteStatus(@PathVariable Long id, @RequestParam boolean isDeleted){
         userService.updateDeleteStatus(id, isDeleted);

@@ -21,16 +21,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(res);
     }
 
-//    @ExceptionHandler(value = { BadCredentialsException.class, InternalAuthenticationServiceException.class })
-//    public ResponseEntity<ApiResponse> handlingBadCredentialsException(
-//            BadCredentialsException exception) {
-//        ApiResponse res = new ApiResponse<>();
-//        res.setCode(ErrorCode.BAD_CREDENTIAL.getCode());
-//        res.setMessage(ErrorCode.BAD_CREDENTIAL.getError());
-//        res.setError("Đăng nhập không thành công");
-//        return ResponseEntity.badRequest().body(res);
-//    }
-
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<ApiResponse> handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();

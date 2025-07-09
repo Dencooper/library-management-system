@@ -14,19 +14,18 @@ public enum ErrorCode {
     INVALID_KEY(500, "Invalid message key"),
 
     // Exception in user module
-    EMAIL_EXISTED(400, "Email đã tổn tại"),
-    EMAIL_INVALID(400, "Email không hợp lệ"),
-    PASSWORD_INVALID(400, "Mật khẩu phải có tối thiểu 8 kí tự (chữ thường, hoa, số, kí tự đặc biệt)"),
-    NAME_INVALID(400, "Họ tên phải có tối thiếu 3 kí tự"),
-    USER_NOTFOUND(400, "Không tìm thấy người dùng"),
+    EMAIL_EXISTED(400, "Email already exists"),
+    EMAIL_INVALID(400, "Invalid email address"),
+    PASSWORD_INVALID(400, "Password must be at least 8 characters long and include lowercase letters, uppercase letters, numbers, and special characters"),
+    USER_NOTFOUND(400, "User not found"),
 
     // Exception in auth module
     BAD_CREDENTIAL(400, "Email hoặc mật khẩu không đúng"),
     MISSING_COOKIE(400, "Bạn chưa đăng nhập"),
     REFRESH_TOKEN_INVALID(401, "Refresh Token không hợp lệ"),
 
-    // Exception in company module
-    COMPANY_NOTFOUND(400, "Không tìm thấy công ty"),
+    // Exception in book module
+    BOOK_NOTFOUND(400, "Không tìm thấy công ty"),
 
     // Exception in skill module
     SKILL_NOTFOUND(400, "Không tìm thấy kĩ năng"),

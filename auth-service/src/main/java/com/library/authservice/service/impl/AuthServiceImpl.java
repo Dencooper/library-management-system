@@ -8,6 +8,8 @@ import com.library.authservice.repository.AccountRepository;
 import com.library.authservice.service.IAuthService;
 import com.library.authservice.service.client.UsersFeignClient;
 import com.library.commonservice.dto.response.UserResponse;
+import com.library.commonservice.exception.AppException;
+import com.library.commonservice.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -27,7 +29,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public UserResponse register(RegisterRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserCreationRequest userCreationRequest = UserCreationRequest.builder()
                 .email(request.getEmail())
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements IAuthService {
     @PostAuthorize("hasRole('ADMIN')")
     public Account addAccount(RegisterRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with email: " + request.getEmail() + " is existed");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         Account account = Account.builder()
@@ -63,7 +65,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public Account fetchAccountByEmail(String email) {
         return accountRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email: " + email + " is existed"));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_EXISTED));
     }
 
     @Override
@@ -74,7 +76,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public Account updateRefreshToken(String email, String refreshToken) {
         Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email: " + email + " is existed"));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_EXISTED));
         account.setRefreshToken(refreshToken);
         return accountRepository.save(account);
     }
@@ -82,6 +84,6 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public Account fetchAccountByRefreshTokenAndEmail(String token, String email) {
         return accountRepository.findByRefreshTokenAndEmail(token, email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
     }
 }

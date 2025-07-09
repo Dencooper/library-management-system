@@ -26,4 +26,11 @@ public class InternalUserController {
     public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email, @RequestHeader("X-Internal-Api-Key") String apiKeyHeader){
         return ResponseEntity.ok().body(userService.getUserByEmailInternal(apiKeyHeader, email));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateBannedUser(@PathVariable Long id, @Valid @RequestParam Boolean isBanned){
+        userService.updateBannedUser(id, isBanned);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -145,7 +145,7 @@
                 <div class="space-y-2">
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Borrowing ID:</span>
-                    <span class="text-sm font-medium text-blue-600">#{{ selectedPenalty.borrowingd }}</span>
+                    <span class="text-sm font-medium text-blue-600">#{{ selectedPenalty.borrowingId }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Borrowed Date:</span>
@@ -158,9 +158,20 @@
                   <div class="mt-3">
                     <span class="text-sm text-gray-500">Books:</span>
                     <div class="mt-1 space-y-1">
-                      <div v-for="item in selectedPenalty.borrowing.items" :key="item.id" class="text-sm">
-                        • Title: {{ item.bookTitle }} - Conditions: {{ item.bookItemCondition }} - Price: ${{ item.price.toFixed(2) }}
-                        
+                      <div
+                        v-for="item in selectedPenalty.borrowing.items"
+                        :key="item.id"
+                        class="flex justify-between text-sm py-2 border-b border-gray-200"
+                      >
+                        <div class="text-left">
+                          <span class="font-medium">Title:</span> {{ item.bookTitle }}
+                        </div>
+                        <div class="text-center">
+                          <span class="font-medium">Condition:</span> {{ item.bookItemCondition }}
+                        </div>
+                        <div class="text-right">
+                          <span class="font-medium">Price:</span> ${{ item.price.toFixed(2) }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -230,8 +241,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { getMyAllPenalties} from '@/api'
+import { ref, onMounted } from 'vue'
+import { getUserAllPenalties, getBorrowingById} from '@/api'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 // State
 const penalties = ref([])
@@ -245,7 +259,7 @@ const errorMessage = ref('')
 const fetchPenalties = async () => {
   try {
     isLoading.value = true
-    const response = await getMyAllPenalties()
+    const response = await getUserAllPenalties(authStore.user.id)
     penalties.value = response.data.data
   } catch (error) {
     console.error('Error fetching penalties:', error)

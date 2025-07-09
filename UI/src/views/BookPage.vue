@@ -1,5 +1,21 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Header with Back Button -->
+    <header v-if="!authStore.isAuthenticated">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <button @click="goBack" class="mr-4 text-gray-600 hover:text-gray-900 flex items-center">
+              <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
@@ -279,6 +295,9 @@
   import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { getAllBooks } from '@/api'
+  import { useAuthStore } from '@/stores/auth'
+
+  const authStore = useAuthStore()
   
   const router = useRouter()
   
@@ -377,6 +396,10 @@
   
   const viewBookDetail = (book) => {
     router.push(`/books/${book.id}`)
+  }
+
+  const goBack = () => {
+    router.push('/')
   }
   
   // Lifecycle

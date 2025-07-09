@@ -25,9 +25,9 @@ public class PenaltyController {
         return ResponseEntity.ok().body(iPenaltyService.getAllPenalties());
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<List<PenaltyResponse>> getPenaltyByUser(){
-        return ResponseEntity.ok().body(iPenaltyService.getUserPenalties());
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<PenaltyResponse>> getPenaltyByUserId(@PathVariable Long id){
+        return ResponseEntity.ok().body(iPenaltyService.getPenaltiesByUserId(id));
     }
 
     @PatchMapping("/{id}")

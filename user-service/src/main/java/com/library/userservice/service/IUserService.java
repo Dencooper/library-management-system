@@ -15,4 +15,5 @@ public interface IUserService {
     List<UserResponse> getAllUsers();
     Void updateDeleteStatus(Long id, boolean isDeleted);
     Long getUserQuantity();
+    Void updateBannedUser(Long id, Boolean isBanned);
 }

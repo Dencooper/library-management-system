@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-gray-50 flex flex-col pt-12 sm:px-6 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <div class="flex justify-center">
           <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,7 +23,7 @@
             <!-- Email -->
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700">
-                Email address
+                Email
               </label>
               <div class="mt-1">
                 <input
@@ -81,26 +81,14 @@
                   </svg>
                 </button>
               </div>
+              
             </div>
   
             <!-- Remember me -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <input
-                  id="remember-me"
-                  v-model="loginForm.rememberMe"
-                  name="remember-me"
-                  type="checkbox"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label for="remember-me" class="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-  
+            <div class="flex items-center">
               <div class="text-sm">
                 <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
+                  Forgot password?
                 </a>
               </div>
             </div>
@@ -108,9 +96,6 @@
             <!-- Error Message -->
             <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4">
               <div class="flex">
-                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
                 <div class="ml-3">
                   <p class="text-sm text-red-800">{{ errorMessage }}</p>
                 </div>
@@ -137,69 +122,67 @@
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, reactive } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
-  import { useAuthStore } from '@/stores/auth'
-  
-  const router = useRouter()
-  const route = useRoute()
-  const authStore = useAuthStore()
-  
-  // State
-  const showPassword = ref(false)
-  const errorMessage = ref('')
-  
-  const loginForm = reactive({
-    email: '',
-    password: '',
-    rememberMe: false
-  })
-  
-  // Methods
-  const handleLogin = async () => {
-    try {
-      errorMessage.value = ''
-      
-      const result = await authStore.loginUser({
-        email: loginForm.email,
-        password: loginForm.password
-      })
-      
-      if (result.success) {
-        // Redirect to intended page or dashboard based on role
-        const redirectTo = route.query.redirect || getDefaultRoute()
-        router.push(redirectTo)
-      } else {
-        errorMessage.value = result.message || 'Login failed'
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      errorMessage.value = 'An unexpected error occurred'
-    }
-  }
-  
-  const getDefaultRoute = () => {
-    if (authStore.isAdmin) {
-      return '/admin/dashboard'
-    } else if (authStore.isLibrarian) {
-      return '/librarian/dashboard'
-    } else {
-      return '/'
-    }
-  }
-  
-  // Hooks should be called at the top level
-  const onMounted = () => {
-    // Clear any existing error messages
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+// State
+const showPassword = ref(false)
+const errorMessage = ref('')
+
+const loginForm = reactive({
+  email: '',
+  password: ''
+})
+
+// Methods
+const validatePassword = (password) => {
+  const strongPasswordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!*()]).{8,}$/
+  return strongPasswordRegex.test(password)
+}
+
+const handleLogin = async () => {
+  try {
     errorMessage.value = ''
-    
-    // If user is already authenticated, redirect them
-    if (authStore.isAuthenticated) {
+
+    // Client-side password validation
+    if (!validatePassword(loginForm.password)) {
+      errorMessage.value = 'Password must be at least 8 characters long and include lowercase letters, uppercase letters, numbers, and special characters'
+      return
+    }
+
+    const result = await authStore.loginUser({
+      email: loginForm.email,
+      password: loginForm.password
+    })
+
+    if (result.success) {
+      // Redirect to intended page or dashboard based on role
       const redirectTo = route.query.redirect || getDefaultRoute()
       router.push(redirectTo)
+    } else {
+      errorMessage.value = result.message || 'Login failed'
     }
+  } catch (error) {
+    console.error('Login error:', error)
+    errorMessage.value = 'An unexpected error occurred'
   }
-  </script>
+}
+
+const getDefaultRoute = () => {
+  if (authStore.isAdmin) {
+    return '/admin/dashboard'
+  } else if (authStore.isLibrarian) {
+    return '/librarian/dashboard'
+  } else {
+    return '/'
+  }
+}
+</script>

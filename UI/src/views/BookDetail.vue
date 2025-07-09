@@ -2,15 +2,21 @@
   <div class="min-h-screen bg-gray-100">
 
     <!-- Header with Back Button -->
-    <header class="bg-white shadow-sm border-b">
+    <header>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center">
-            <button @click="goBack" class="mr-4 text-gray-600 hover:text-gray-900 flex items-center">
+            <button @click="goHome" class="mr-4 text-gray-600 hover:text-gray-900 flex items-center">
               <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
               Home
+            </button>
+            <button @click="goBack" class="mr-4 text-gray-600 hover:text-gray-900 flex items-center">
+              <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Books
             </button>
           </div>
         </div>
@@ -212,7 +218,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getBook, getBookItemsByBook, getAllBooks, createBorrowingRequest } from '../../api'
+import { getBook, getBookItemsByBook, getAllBooks } from '../api'
 
 // Router instances
 const route = useRoute()
@@ -282,6 +288,10 @@ watch(() => route.params.id, () => {
 })
 
 const goBack = () => {
+  router.push('/books')
+}
+
+const goHome = () => {
   router.push('/')
 }
 

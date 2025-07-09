@@ -39,6 +39,10 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public BorrowingResponse createBorrowing(BorrowingCreationRequest request) {
+        if(borrowingRepository.existsByUserIdAndReturnedAt(usersFeignClient.getUserByEmail(request.getEmail()).getBody().getData().getId(), null)){
+            throw new RuntimeException("This user has a active borrowing");
+        };
+
         Borrowing borrowing = Borrowing.builder()
                 .userId(usersFeignClient.getUserByEmail(request.getEmail()).getBody().getData().getId())
                 .librarianId(authFeignClient.fetchUser().getBody().getData().getId())

@@ -128,8 +128,8 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-blue-600">
-                    Borrowing #{{ penalty.borrowingId }}
+                  <div class="text-sm font-medium">
+                     #{{ penalty.borrowingId }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -235,7 +235,7 @@
                   ></textarea>
                 </div>
                 <!-- Payment Status -->
-                <div v-if="!penaltyForm.isPaid">
+                <div>
                   <div>
                     <label class="flex items-center">
                       <input
@@ -304,7 +304,7 @@
                 <div class="space-y-2">
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Borrowing ID:</span>
-                    <span class="text-sm font-medium text-blue-600">#{{ selectedPenalty.borrowingd }}</span>
+                    <span class="text-sm font-medium text-blue-600">#{{ selectedPenalty.borrowingId }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Borrowed Date:</span>
@@ -317,9 +317,14 @@
                   <div class="mt-3">
                     <span class="text-sm text-gray-500">Books:</span>
                     <div class="mt-1 space-y-1">
-                      <div v-for="item in selectedPenalty.borrowing.items" :key="item.id" class="text-sm">
-                        • Title: {{ item.bookTitle }} - Conditions: {{ item.bookItemCondition }} - Price: ${{ item.price.toFixed(2) }}
-                        
+                      <div
+                        v-for="item in selectedPenalty.borrowing.items"
+                        :key="item.id"
+                        class="grid grid-cols-4 gap-4 text-sm py-1 border-b border-gray-200"
+                      >
+                        <div class="col-span-2 font-medium">{{ item.bookTitle }}</div>
+                        <div><span class="font-medium">Condition:</span> {{ item.bookItemCondition }}</div>
+                        <div class="text-end"><span class="font-medium">Price:</span> ${{ item.price.toFixed(2) }}</div>
                       </div>
                     </div>
                   </div>
@@ -437,7 +442,7 @@ const filteredPenalties = computed(() => {
     if (selectedStatus.value === 'paid') {
       filtered = filtered.filter(penalty => penalty.paid)
     } else if (selectedStatus.value === 'unpaid') {
-      filtered = filtered.filter(penalty => !penalty.isPaid)
+      filtered = filtered.filter(penalty => !penalty.paid)
     }
   }
 
@@ -457,11 +462,11 @@ const filteredPenalties = computed(() => {
 })
 
 const unpaidCount = computed(() => 
-  penalties.value.filter(p => !p.isPaid).length
+  penalties.value.filter(p => !p.paid).length
 )
 
 const paidCount = computed(() => 
-  penalties.value.filter(p => p.isPaid).length
+  penalties.value.filter(p => p.paid).length
 )
 
 const totalAmount = computed(() => 

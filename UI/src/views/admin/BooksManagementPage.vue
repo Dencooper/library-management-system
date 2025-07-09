@@ -167,23 +167,23 @@
                     {{ book.isAvailable ? 'Available' : 'Not Available' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex items-center justify-end space-x-2">
+                <td class="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex items-center justify-end">
                     <router-link
-                      :to="`/librarian/book-items?bookTitle=${book.title}`"
-                      class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded text-xs font-medium transition-colors"
+                      :to="`/admin/book-items?bookTitle=${book.title}`"
+                      class="text-blue-600 hover:text-blue-900 px-1 py-1 rounded font-medium transition-colors"
                     >
-                      Items
+                      Item
                     </router-link>
                     <button
                       @click="editBook(book)"
-                      class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded text-xs font-medium transition-colors"
+                      class="text-indigo-600 hover:text-indigo-900 px-1 py-1 rounded font-medium transition-colors"
                     >
                       Edit
                     </button>
                     <button
                       @click="deleteBook(book)"
-                      class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs font-medium transition-colors"
+                      class="text-red-600 hover:text-red-900 px-1 py-1 rounded font-medium transition-colors"
                     >
                       Delete
                     </button>

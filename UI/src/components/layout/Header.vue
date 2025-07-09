@@ -64,7 +64,7 @@
               Borrowing
             </router-link>
             <router-link to="/admin/penalties" :class="[ 'px-3 py-2 text-sm font-medium hover:text-blue-600', route.path === '/admin/penalties' ? 'text-blue-600' : 'text-gray-900']">
-              Penaltie
+              Penalty
             </router-link>
             <router-link to="/admin/books" :class="[ 'px-3 py-2 text-sm font-medium hover:text-blue-600', route.path === '/admin/books' ? 'text-blue-600' : 'text-gray-900']">
               Book

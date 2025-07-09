@@ -576,7 +576,7 @@
                       <div class="space-y-4">
                         <!-- Return Condition -->
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Return Condition *
+                          Return Condition
                         </label>
                         <select
                           v-model="returnForm.itemConditions[item.id]"
@@ -608,7 +608,7 @@
                       <!-- Penalty Description (only for MAJOR_DAMAGE or LOST) -->
                       <div v-if="needsPenaltyDescription()">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Penalty Description *
+                          Penalty Description
                         </label>
                         <textarea
                           v-model="returnForm.penaltyDescriptions"
@@ -765,7 +765,7 @@ const canProcessReturn = computed(() => {
 
   if (!allConditionsSelected) return false
 
-  if (!returnForm.penaltyDescriptions.trim()) {
+  if( needsPenaltyDescription() && !returnForm.penaltyDescriptions.trim()) {
     return false
   }
 
