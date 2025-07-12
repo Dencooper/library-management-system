@@ -16,6 +16,7 @@ import com.library.borrowingservice.service.client.BooksFeignClient;
 import com.library.borrowingservice.service.client.UsersFeignClient;
 import com.library.commonservice.dto.request.BookItemUpdateRequest;
 import com.library.commonservice.dto.response.UserResponse;
+import com.library.commonservice.service.KafkaService;
 import com.library.commonservice.utils.constant.BookItemCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +35,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
     private final BooksFeignClient booksFeignClient;
     private final UsersFeignClient usersFeignClient;
     private final AuthFeignClient authFeignClient;
+    private final KafkaService kafkaService;
 
     @Override
     @Transactional
@@ -72,6 +74,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
 
         borrowing.setItems(items);
         borrowingRepository.save(borrowing);
+        kafkaService.sendMessage("borrowingNotification", borrowingMapper.toResponse(borrowing));
         return borrowingMapper.toResponse(borrowing);
     }
 
@@ -168,5 +171,19 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @Transactional(readOnly = true)
     public Long getBorrowingQuantity() {
         return borrowingRepository.count();
+    }
+
+    @Override
+    public Void sendReturnReminderBorrowingEmail() {
+        List<Borrowing> borrowingList = borrowingRepository.findAllByReturnedAtIsNull();
+        if(borrowingList != null && !borrowingList.isEmpty()) {
+            for(Borrowing borrowing : borrowingList) {
+                LocalDateTime borrowedPlus27 = borrowing.getBorrowedAt().plusDays(27);
+                if(borrowedPlus27.isBefore(LocalDateTime.now()) || borrowedPlus27.isEqual(LocalDateTime.now())){
+                    kafkaService.sendMessage("returnReminderNotification", borrowingMapper.toResponse(borrowing));
+                }
+            }
+        }
+        return null;
     }
 }

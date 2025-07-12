@@ -17,4 +17,8 @@ public interface UsersFeignClient {
 
     @PutMapping("/api/v1/internal/users/{id}")
     public ResponseEntity<Void> updateBannedUser(@PathVariable Long id, @Valid @RequestParam Boolean isBanned);
+
+    @PutMapping("/api/v1/internal/users/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByIdInternal(@PathVariable Long id, @RequestHeader("X-Internal-Api-Key") String apiKeyHeader);
+
 }

@@ -10,7 +10,7 @@ import LoginPage from '@/views/auth/LoginPage.vue'
 import RegisterPage from '@/views/auth/RegisterPage.vue'
 
 // USER pages
-import ProfilePage from '@/views/user/ProfilePage.vue'
+import ProfilePage from '@/views/ProfilePage.vue'
 import BorrowBookPage from '@/views/BookPage.vue'
 import MyBorrowingsPage from '@/views/user/MyBorrowingsPage.vue'
 import MyPenaltiesPage from '@/views/user/MyPenaltiesPage.vue'
@@ -69,7 +69,7 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfilePage,
-    meta: { requiresAuth: true, role: 'USER' }
+    meta: { requiresAuth: true}
   },
   {
     path: '/my-borrowings',

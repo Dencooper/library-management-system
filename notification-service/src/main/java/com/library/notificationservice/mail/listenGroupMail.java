@@ -2,12 +2,14 @@ package com.library.notificationservice.mail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.library.commonservice.dto.response.BorrowingResponse;
 import com.library.commonservice.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,22 +37,38 @@ public class listenGroupMail {
 //    void handleDtlMessage(@Payload String message){
 //        System.out.println("DTL receiving message: " + message);
 //    }
-    
-    @KafkaListener(id = "notificationGroup", topics = "notification")
-    public void listen(String message) throws JsonProcessingException {
-        BorrowingRequestResponse payload = objectMapper.readValue(message, BorrowingRequestResponse.class);
+
+    @KafkaListener(id = "notificationGroup", topics = "borrowingNotification")
+    public void listenBorrowingNotification(String message) throws JsonProcessingException {
+        BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
         Map<String, Object> placeholders = new HashMap<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         placeholders.put("studentName", payload.getUser().getFullName());
-        placeholders.put("borrowedBooks", payload.getBooks());
+        placeholders.put("studentEmail", payload.getUser().getEmail());
+        placeholders.put("studentPhone", payload.getUser().getPhone());
         placeholders.put("librarianName", payload.getLibrarian().getFullName());
         placeholders.put("librarianEmail", payload.getLibrarian().getEmail());
-        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Accept Request Borrowing ID -  " + payload.getId(), "acceptBorrowingRequestTemplate.ftl", placeholders, null);
+        placeholders.put("librarianPhone", payload.getLibrarian().getPhone());
+        placeholders.put("borrowedAt", payload.getBorrowedAt().format(formatter));
+        placeholders.put("dueDate", payload.getBorrowedAt().plusDays(30).format(formatter));
+        placeholders.put("borrowedBooks", payload.getItems());
+        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Borrowing #" + payload.getId() + " - Online Library", "borrowingNotificationTemplate.ftl", placeholders, null);
     }
 
-    @KafkaListener(id = "notificationGroup1", topics = "notificationAccept")
-    public void listen1(BorrowingRequestResponse payload) {
+    @KafkaListener(id = "notificationGroup", topics = "returnReminderNotification")
+    public void listenReturnReminderNotification(String message) throws JsonProcessingException {
+        BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
         Map<String, Object> placeholders = new HashMap<>();
-        placeholders.put("name", payload.getUser().getFullName());
-        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Accept Request Borrowing", "acceptBorrowingRequestTemplate.ftl", placeholders, null);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        placeholders.put("studentName", payload.getUser().getFullName());
+        placeholders.put("studentEmail", payload.getUser().getEmail());
+        placeholders.put("studentPhone", payload.getUser().getPhone());
+        placeholders.put("librarianName", payload.getLibrarian().getFullName());
+        placeholders.put("librarianEmail", payload.getLibrarian().getEmail());
+        placeholders.put("librarianPhone", payload.getLibrarian().getPhone());
+        placeholders.put("borrowedAt", payload.getBorrowedAt().format(formatter));
+        placeholders.put("dueDate", payload.getBorrowedAt().plusDays(30).format(formatter));
+        placeholders.put("borrowedBooks", payload.getItems());
+        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Reminder Return Borrowing #" + payload.getId() + " - Online Library", "returnReminderNotificationTemplate.ftl", placeholders, null);
     }
 }

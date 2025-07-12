@@ -3,12 +3,13 @@ package com.library.borrowingservice.controller;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
-import com.library.borrowingservice.model.Borrowing;
 import com.library.borrowingservice.service.IBorrowingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,5 +53,12 @@ public class BorrowingController {
     @GetMapping("/quantity")
     public ResponseEntity<Long> getBorrowingQuantity(){
         return ResponseEntity.ok().body(iBorrowingService.getBorrowingQuantity());
+    }
+
+    @Scheduled(cron = "0 */2 * * * *")
+    @Transactional
+    public ResponseEntity<String> sendEmail() {
+        iBorrowingService.sendReturnReminderBorrowingEmail();
+        return ResponseEntity.ok().body("Borrowing due date sent successfully.");
     }
 }

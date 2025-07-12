@@ -9,6 +9,7 @@ import com.library.borrowingservice.service.client.UsersFeignClient;
 import com.library.commonservice.dto.ApiResponse;
 import com.library.commonservice.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,9 @@ public class BorrowingMapper {
         private final UsersFeignClient usersFeignClient;
         private final AuthFeignClient authFeignClient;
 
+        @Value("${library.internal-api-key}")
+        private String apiKey;
+
         public BorrowingResponse toResponse(Borrowing borrowing) {
                 List<BookItemResponse> bookItemResponses = borrowing.getItems()
                                 .stream()
@@ -28,8 +32,8 @@ public class BorrowingMapper {
                                                 .getData())
                                 .toList();
 
-                ResponseEntity<ApiResponse<UserResponse>> user = usersFeignClient.getUserById(borrowing.getUserId());
-                ResponseEntity<ApiResponse<UserResponse>> librarian = authFeignClient.fetchUser();
+                ResponseEntity<ApiResponse<UserResponse>> user = usersFeignClient.getUserByIdInternal(borrowing.getUserId(), apiKey);
+                ResponseEntity<ApiResponse<UserResponse>> librarian = usersFeignClient.getUserByIdInternal(borrowing.getLibrarianId(), apiKey);
 
                 return BorrowingResponse.builder()
                                 .id(borrowing.getId())

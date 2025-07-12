@@ -160,8 +160,7 @@
     try {
       isUpdating.value = true
       
-      // Add your update profile API call here
-      // await updateUserProfile(profileForm)
+      await updateUserProfile(profileForm)
       
       // Update auth store
       authStore.updateUser(profileForm)

@@ -136,7 +136,7 @@
                       item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     ]"
                   >
-                    {{ item.available ? 'Available' : 'Borrowed' }}
+                    {{ item.available ? 'Available' : 'Unavailable' }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -168,6 +168,60 @@
           <h3 class="text-lg font-medium text-gray-900 mb-2">No book items found</h3>
           <p class="text-gray-600">Try adjusting your search criteria</p>
         </div>
+
+        <!-- Pagination -->
+        <div v-if="filteredItems.length > 0" class="px-6 py-4 border-t border-gray-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-sm text-gray-700 mr-4">
+                Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredItems.length) }} of {{ filteredItems.length }} items
+              </span>
+              <select
+                v-model="pageSize"
+                @change="fetchBookItems"
+                class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option :value="10">10 per page</option>
+                <option :value="25">25 per page</option>
+                <option :value="50">50 per page</option>
+                <option :value="100">100 per page</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                @click="currentPage = 1; fetchBookItems()"
+                :disabled="currentPage === 1"
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                First
+              </button>
+              <button
+                @click="currentPage--; fetchBookItems()"
+                :disabled="currentPage === 1"
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <span class="text-sm text-gray-700">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+              <button
+                @click="currentPage++; fetchBookItems()"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+              <button
+                @click="currentPage = totalPages; fetchBookItems()"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Last
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -175,7 +229,7 @@
     <div v-if="showAddModal || showEditModal" class="fixed inset-0 z-50 overflow-y-auto" @click="closeModal">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
         <div @click.stop class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <form @submit.prevent="saveItem">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -297,6 +351,9 @@ const selectedAvailability = ref('')
 const selectedCondition = ref('')
 const message = ref('')
 const errorMessage = ref('')
+const currentPage = ref(1)
+const totalPages = ref(1)
+const pageSize = ref(10)
 
 const itemForm = reactive({
   id: null,
@@ -343,6 +400,8 @@ const fetchBookItems = async () => {
     isLoading.value = true
     const response = await getAllBookItems()
     bookItems.value = response.data.data
+    currentPage.value = response.data.currentPage
+    totalPages.value = response.data.totalPages
   } catch (error) {
     console.error('Error fetching book items:', error)
     errorMessage.value = 'Failed to load book items'
@@ -374,7 +433,7 @@ const getConditionClass = (condition) => {
       'LOST': 'bg-red-100 text-red-800'
     }
     return classes[condition] || 'bg-gray-100 text-gray-800'
-  }
+}
 
 const getConditionLabel = (condition) => {
   const labels = {
@@ -411,6 +470,10 @@ const deleteItem = async (item) => {
       await deleteBookItem(item.id, true)
       
       bookItems.value = bookItems.value.filter(i => i.id !== item.id)
+      if (bookItems.value.length === 0 && currentPage.value > 1) {
+        currentPage.value--
+        await fetchBookItems()
+      }
       message.value = 'Book item deleted successfully'
       setTimeout(() => message.value = '', 3000)
     } catch (error) {
@@ -463,7 +526,7 @@ const closeModal = () => {
   Object.keys(itemForm).forEach(key => {
     if (key === 'id') {
       itemForm[key] = null
-    } else if (key === 'available') {
+    } else if (key === 'isAvailable') {
       itemForm[key] = true
     } else {
       itemForm[key] = ''

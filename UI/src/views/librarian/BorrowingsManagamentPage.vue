@@ -258,7 +258,7 @@
                           Name: {{ user.fullName }}
                         </div>
                         <div class="text-gray-900">
-                          Phone Number: {{ user.phoneNumber || '...' }}
+                          Phone Number: {{ user.phone || '...' }}
                         </div>
                       </div>
                       <div class="flex w-full">

@@ -1,6 +1,7 @@
 package com.library.userservice.service.impl;
 
 import com.library.commonservice.dto.response.UserResponse;
+import com.library.commonservice.utils.constant.Role;
 import com.library.userservice.dto.RegisterRequest;
 import com.library.userservice.dto.UserRequest;
 import com.library.userservice.mapper.UserMapper;
@@ -8,10 +9,8 @@ import com.library.userservice.model.User;
 import com.library.userservice.repository.UserRepository;
 import com.library.userservice.service.IUserService;
 import com.library.userservice.service.client.AuthFeignClient;
-import com.library.userservice.utils.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +38,7 @@ public class UserServiceImpl implements IUserService {
         }
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .email(request.getEmail())
-                .password(request.getRole().equals(Role.LIBRARIAN) ? "Librarian@123" : "User@123")
+                .password(request.getRole() == Role.LIBRARIAN ? "Librarian@123" : "User@123")
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .address(request.getAddress())
@@ -83,6 +82,16 @@ public class UserServiceImpl implements IUserService {
             throw new RuntimeException("Forbidden");
         }
         User user = userRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new RuntimeException("User not found or already deleted"));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse getUserByIdInternal(String apiKeyHeader, Long id) {
+        if (!apiKey.equals(apiKeyHeader)) {
+            throw new RuntimeException("Forbidden");
+        }
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found or already deleted"));
         return userMapper.toResponse(user);
     }

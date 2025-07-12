@@ -16,4 +16,5 @@ public interface IBorrowingService {
     BorrowingResponse getBorrowingById(Long id);
     Boolean checkBannedUser(Long userId);
     Long getBorrowingQuantity();
+    Void sendReturnReminderBorrowingEmail();
 }
