@@ -2,16 +2,21 @@ package com.library.borrowingservice.controller;
 
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
+import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
+import com.library.borrowingservice.dto.response.borrowing.BorrowingStatisticsResponse;
 import com.library.borrowingservice.service.IBorrowingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -55,7 +60,28 @@ public class BorrowingController {
         return ResponseEntity.ok().body(iBorrowingService.getBorrowingQuantity());
     }
 
-    @Scheduled(cron = "0 */2 * * * *")
+    @GetMapping("/statistic")
+    public ResponseEntity<BorrowingStatisticsResponse> getBorrowingStat(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ){
+        LocalDateTime from = fromDate.atStartOfDay();
+        LocalDateTime to = toDate.atStartOfDay();
+        return ResponseEntity.ok().body(iBorrowingService.doBorrowingStatistics(from, to));
+    }
+
+    @GetMapping("/book-statistic")
+    public ResponseEntity<BookStatisticsResponse> getBookStat(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ){
+        LocalDateTime from = fromDate.atStartOfDay();
+        LocalDateTime to = toDate.atStartOfDay();
+        return ResponseEntity.ok().body(iBorrowingService.doBookStatistic(from, to));
+    }
+
+//    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 0 7 * * *")
     @Transactional
     public ResponseEntity<String> sendEmail() {
         iBorrowingService.sendReturnReminderBorrowingEmail();

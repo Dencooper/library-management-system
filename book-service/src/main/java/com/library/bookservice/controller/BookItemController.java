@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/book-items")
@@ -62,5 +63,10 @@ public class BookItemController {
     ) {
         bookItemService.deleteBookItem(id, isDeleted);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/book-ids")
+    public ResponseEntity<Map<Long, Long>> getBookIdsByItemIds(@RequestBody List<Long> bookItemIds) {
+        return ResponseEntity.ok().body(bookItemService.getBookIdsByItemIds(bookItemIds));
     }
 }

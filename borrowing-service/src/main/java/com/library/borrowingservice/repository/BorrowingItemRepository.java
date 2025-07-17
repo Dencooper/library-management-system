@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface BorrowingItemRepository extends JpaRepository<BorrowingItem, Long> {
     List<BorrowingItem> findByBorrowingId(Long borrowingId);
+    boolean existsByBookItemId(Long bookItemId);
 }

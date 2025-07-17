@@ -38,7 +38,7 @@ public class listenGroupMail {
 //        System.out.println("DTL receiving message: " + message);
 //    }
 
-    @KafkaListener(id = "notificationGroup", topics = "borrowingNotification")
+    @KafkaListener(id = "notificationGroup1", topics = "borrowingNotification")
     public void listenBorrowingNotification(String message) throws JsonProcessingException {
         BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
         Map<String, Object> placeholders = new HashMap<>();
@@ -55,7 +55,7 @@ public class listenGroupMail {
         emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Borrowing #" + payload.getId() + " - Online Library", "borrowingNotificationTemplate.ftl", placeholders, null);
     }
 
-    @KafkaListener(id = "notificationGroup", topics = "returnReminderNotification")
+    @KafkaListener(id = "notificationGroup2", topics = "returnReminderNotification")
     public void listenReturnReminderNotification(String message) throws JsonProcessingException {
         BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
         Map<String, Object> placeholders = new HashMap<>();

@@ -141,4 +141,5 @@ public class BookServiceImpl implements IBookService {
     public Long getBookQuantity() {
         return bookRepository.count();
     }
+
 }

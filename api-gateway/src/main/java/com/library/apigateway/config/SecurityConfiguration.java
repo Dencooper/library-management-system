@@ -71,6 +71,7 @@ public class SecurityConfiguration {
                         .pathMatchers(whiteList).permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/book-items/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/v1/internal/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())

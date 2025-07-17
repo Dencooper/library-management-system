@@ -9,13 +9,13 @@ import com.library.bookservice.repository.BookItemRepository;
 import com.library.bookservice.repository.BookRepository;
 import com.library.bookservice.service.IBookItemService;
 import com.library.commonservice.dto.request.BookItemUpdateRequest;
-import com.library.commonservice.utils.constant.BookItemCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,5 +104,14 @@ public class BookItemServiceImpl implements IBookItemService {
         bookItem.setDeleted(isDeleted);
         bookItemRepository.save(bookItem);
         return null;
+    }
+
+    @Override
+    public Map<Long, Long> getBookIdsByItemIds(List<Long> bookItemIds) {
+        return bookItemRepository.findAllById(bookItemIds).stream()
+                .collect(Collectors.toMap(
+                        BookItem::getId,
+                        item -> item.getBook().getId()
+                ));
     }
 }
