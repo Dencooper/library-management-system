@@ -305,6 +305,15 @@ export const updatePenalty = async (id, data) => {
   return response;
 };
 
+export const getBorrowingStatistics = async ({ from, to }) => {
+  const response = await api.get('/borrowings/statistic', { params: { from, to } });
+  return response;
+};
+
+export const getBookStatistics = async ({ from, to }) => {
+  const response = await api.get('/borrowings/book-statistic', { params: { from, to } });
+  return response;
+};
 
 
 

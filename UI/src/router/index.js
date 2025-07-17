@@ -31,6 +31,7 @@ import ShelvesManagementPageAdmin from '@/views/admin/ShelvesManagementPage.vue'
 import BorrowingsManagementPageAdmin from '@/views/admin/BorrowingsManagamentPage.vue'
 import PenaltiesManagementPageAdmin from '@/views/admin/PenaltiesManagementPage.vue'
 import AccountsManagementPageAdmin from '@/views/admin/AccountManagementPage.vue'
+import AdminDashboard from '@/views/admin/DashboardPage.vue'
 
 const routes = [
   // Public routes
@@ -129,12 +130,12 @@ const routes = [
   // },
   
   // ADMIN routes
-  // {
-  //   path: '/admin/dashboard',
-  //   name: 'admin-dashboard',
-  //   component: AdminDashboard,
-  //   meta: { requiresAuth: true, role: 'ADMIN' }
-  // },
+  {
+    path: '/admin/dashboard',
+    name: 'admin-dashboard',
+    component: AdminDashboard,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
   {
     path: '/admin/accounts',
     name: 'admin-accounts',

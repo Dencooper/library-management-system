@@ -58,7 +58,7 @@
               Dashboard
             </router-link>
             <router-link to="/admin/accounts" :class="[ 'px-3 py-2 text-sm font-medium hover:text-blue-600', route.path === '/admin/accounts' ? 'text-blue-600' : 'text-gray-900']">
-              Account
+              User
             </router-link>
             <router-link to="/admin/borrowings" :class="[ 'px-3 py-2 text-sm font-medium hover:text-blue-600', route.path === '/admin/borrowings' ? 'text-blue-600' : 'text-gray-900']">
               Borrowing
