@@ -147,8 +147,11 @@
                     ]"
                   ></div>
                 </div>
-                <p class="text-xs text-gray-600 mt-1">
+                <p v-if = "registerForm.password != ''" class="text-xs text-gray-600 mt-1">
                   {{ getPasswordStrengthText() }}
+                </p>
+                <p v-if ="getPasswordStrength() < 4" class="text-xs text-gray-600 mt-1">
+                  Password must be at least 8 characters long and include lowercase letters, uppercase letters, numbers, and special characters
                 </p>
               </div>
             </div>
@@ -212,9 +215,9 @@
               />
               <label for="terms" class="ml-2 block text-sm text-gray-900">
                 I agree to the
-                <a href="#" class="text-blue-600 hover:text-blue-500">Terms and Conditions</a>
+                <a href="/terms-and-conditions" class="text-blue-600 hover:text-blue-500">Terms and Conditions</a>
                 and
-                <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                <a href="/privacy-policy" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
               </label>
             </div>
   
@@ -299,7 +302,7 @@
            registerForm.password &&
            passwordsMatch.value &&
            registerForm.acceptTerms &&
-           getPasswordStrength() >= 2
+           getPasswordStrength() >= 4
   })
   
   // Methods
@@ -325,9 +328,9 @@
   
   const getPasswordStrengthText = () => {
     const strength = getPasswordStrength()
-    if (strength <= 1) return 'Weak password'
-    if (strength <= 2) return 'Fair password'
-    if (strength <= 3) return 'Good password'
+    if (strength <= 1) return 'Invalid password'
+    if (strength <= 2) return 'Invalid password'
+    if (strength <= 3) return 'Invalid password'
     return 'Strong password'
   }
   

@@ -842,7 +842,7 @@ const clearAllBooks = () => {
 const getDueDate = (borrowedAt) => {
   const borrowDate = new Date(borrowedAt)
   const dueDate = new Date(borrowDate)
-  dueDate.setDate(dueDate.getDate() + 30) // 30 days loan period
+  dueDate.setDate(dueDate.getDate() + 30)
   return dueDate.toISOString()
 }
 
@@ -853,9 +853,9 @@ const getDueDateClass = (borrowing) => {
   const now = new Date()
   const daysDiff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
   
-  if (daysDiff < 0) return 'text-red-600' // Overdue
-  if (daysDiff <= 3) return 'text-yellow-600' // Due soon
-  return 'text-gray-900' // Normal
+  if (daysDiff < 0) return 'text-red-600'
+  if (daysDiff <= 3) return 'text-yellow-600'
+  return 'text-gray-900'
 }
 
 const getBorrowingStatus = (borrowing) => {
@@ -936,7 +936,6 @@ const confirmCreateBorrowing = async () => {
 
     const response = await createBorrowing(borrowingData)
     
-    // Add the new borrowing to the list
     borrowings.value.unshift(response.data.data)
     
     message.value = 'Borrowing created successfully!'
@@ -944,7 +943,6 @@ const confirmCreateBorrowing = async () => {
     
     closeCreateBorrowingModal()
     
-    // Refresh the borrowings list
     await fetchBorrowings()
   } catch (error) {
     console.error('Error creating borrowing:', error)

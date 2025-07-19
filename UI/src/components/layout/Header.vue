@@ -100,8 +100,8 @@
               class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
             >
               <div class="px-4 py-2 text-sm text-gray-700 border-b">
-                <div class="font-medium">{{ authStore.user?.fullName }}</div>
-                <div class="text-gray-500">{{ authStore.user?.email }}</div>
+                <div class="font-medium truncate w-44">{{ authStore.user?.fullName }}</div>
+                <div class="text-gray-500 truncate w-44">{{ authStore.user?.email }}</div>
               </div>
               <router-link
                 to="/profile"

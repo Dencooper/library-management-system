@@ -9,6 +9,10 @@ import BookDetail from '@/views/BookDetail.vue'
 import LoginPage from '@/views/auth/LoginPage.vue'
 import RegisterPage from '@/views/auth/RegisterPage.vue'
 
+// Terms and Conditions
+import TermsAndConditionsPage from '@/views/TermsAndConditionsPage.vue'
+import PrivacyPolicyPage from '@/views/PrivacyPolicyPage.vue'
+
 // USER pages
 import ProfilePage from '@/views/ProfilePage.vue'
 import BorrowBookPage from '@/views/BookPage.vue'
@@ -16,7 +20,7 @@ import MyBorrowingsPage from '@/views/user/MyBorrowingsPage.vue'
 import MyPenaltiesPage from '@/views/user/MyPenaltiesPage.vue'
 
 // // LIBRARIAN pages
-// import LibrarianDashboard from '@/views/librarian/LibrarianDashboard.vue'
+import LibrarianDashboard from '@/views/librarian/DashboardPage.vue'
 import BooksManagementPage from '@/views/librarian/BooksManagementPage.vue'
 import BookItemsManagementPage from '@/views/librarian/BookItemsManagementPage.vue'
 import ShelvesManagementPage from '@/views/librarian/ShelvesManagementPage.vue'
@@ -64,6 +68,16 @@ const routes = [
     component: RegisterPage,
     meta: { requiresGuest: true }
   },
+  {
+    path: '/terms-and-conditions',
+    name: 'TermsAndConditions',
+    component: TermsAndConditionsPage,
+  },
+  {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyPage,
+  },
   
   // USER routes
   {
@@ -85,13 +99,13 @@ const routes = [
     meta: { requiresAuth: true, role: 'USER' }
   },
   
-  // // LIBRARIAN routes
-  // {
-  //   path: '/librarian/dashboard',
-  //   name: 'librarian-dashboard',
-  //   component: LibrarianDashboard,
-  //   meta: { requiresAuth: true, role: 'LIBRARIAN' }
-  // },
+  // LIBRARIAN routes
+  {
+    path: '/librarian/dashboard',
+    name: 'librarian-dashboard',
+    component: LibrarianDashboard,
+    meta: { requiresAuth: true, role: 'LIBRARIAN' }
+  },
   {
     path: '/librarian/books',
     name: 'librarian-books',
@@ -122,12 +136,6 @@ const routes = [
     component: PenaltiesManagementPage,
     meta: { requiresAuth: true, role: 'LIBRARIAN' }
   },
-  // {
-  //   path: '/librarian/reports',
-  //   name: 'librarian-reports',
-  //   component: ReportsPage,
-  //   meta: { requiresAuth: true, role: 'LIBRARIAN' }
-  // },
   
   // ADMIN routes
   {

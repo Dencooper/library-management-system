@@ -195,16 +195,6 @@ export const getBookItemsByBook = async (bookId, isAvailable) => {
   return response;
 };
 
-// export const updateAvailableBookItem = async (id, isAvailable) => {
-//   const response = await api.put(`/book-items/available/${id}`, isAvailable);
-//   return response;
-// };
-
-// export const updateConditionBookItem = async (id, condition) => {
-//   const response = await api.put(`/book-items/condition/${id}`, condition);
-//   return response;
-// };
-
 
 export const deleteBookItem = async (id, isDeleted) => {
   try {
@@ -315,5 +305,14 @@ export const getBookStatistics = async ({ from, to }) => {
   return response;
 };
 
+export const getUserStatistics = async ({ from, to }) => {
+  const response = await api.get('/borrowings/user-statistic', { params: { from, to } });
+  return response;
+};
+
+export const getPenaltyStatistics = async ({ from, to }) => {
+  const response = await api.get('/penalties/statistic', { params: { from, to } });
+  return response;
+};
 
 
