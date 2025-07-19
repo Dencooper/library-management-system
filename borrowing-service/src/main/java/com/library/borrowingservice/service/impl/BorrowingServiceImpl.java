@@ -3,10 +3,7 @@ package com.library.borrowingservice.service.impl;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.request.penalty.PenaltyCreationRequest;
-import com.library.borrowingservice.dto.response.borrowing.BookItemResponse;
-import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
-import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
-import com.library.borrowingservice.dto.response.borrowing.BorrowingStatisticsResponse;
+import com.library.borrowingservice.dto.response.borrowing.*;
 import com.library.borrowingservice.mapper.BorrowingMapper;
 import com.library.borrowingservice.model.Borrowing;
 import com.library.borrowingservice.model.BorrowingItem;
@@ -52,7 +49,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public BorrowingResponse createBorrowing(BorrowingCreationRequest request) {
         if(borrowingRepository.existsByUserIdAndReturnedAt(usersFeignClient.getUserByEmail(request.getEmail()).getBody().getData().getId(), null)){
-            throw new RuntimeException("This user has a active borrowing");
+            throw new RuntimeException("This user has a active or overdue borrowing");
         };
 
         Borrowing borrowing = Borrowing.builder()
@@ -156,6 +153,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public List<BorrowingResponse> getBorrowingsByUser(String email) {
         UserResponse user = usersFeignClient.getUserByEmail(email).getBody().getData();
 
@@ -166,6 +164,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public Boolean checkBannedUser(Long userId) {
         List<Borrowing> borrowings = borrowingRepository.findAllByUserId(userId);
         int count = 0;
@@ -198,6 +197,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public BorrowingStatisticsResponse doBorrowingStatistics(LocalDateTime from, LocalDateTime to) {
         List<Borrowing> borrowings = borrowingRepository.findAllByBorrowedAtBetween(from, to);
         long onTimeReturns = 0;
@@ -232,9 +232,10 @@ public class BorrowingServiceImpl implements IBorrowingService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public BookStatisticsResponse doBookStatistic(LocalDateTime from, LocalDateTime to) {
         Map<Long, Long> bookItemIdToCount = new HashMap<>();
-        List<Borrowing> borrowings = borrowingRepository.findAllByBorrowedAtBetween(from, to);;
+        List<Borrowing> borrowings = borrowingRepository.findAllByBorrowedAtBetween(from, to);
         List<BookItemResponse> bookItemResponses = booksFeignClient.getAllBookItems().getBody().getData();
         long availableBooks = bookItemResponses.stream()
                 .filter(BookItemResponse::isAvailable)
@@ -289,6 +290,48 @@ public class BorrowingServiceImpl implements IBorrowingService {
                 )
                 .availabilityRate(((double) availableBooks /bookItemResponses.size()) * 100)
                 .utilizationRate(((double) borrowedBooks /bookItemResponses.size()) * 100)
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public UserStatisticsResponse doUserStatistic(LocalDateTime from, LocalDateTime to) {
+        List<UserResponse> userResponses = usersFeignClient.getAllUsers().getBody().getData();
+        List<Borrowing> borrowings = borrowingRepository.findAllByBorrowedAtBetween(from, to);
+        long activeUsers = userResponses.size() - userResponses.stream()
+                .filter(UserResponse::getIsBanned)
+                .count();
+        long newRegistrations = userResponses.stream()
+                .filter(userResponse ->
+                        (userResponse.getCreatedAt().isAfter(from) || userResponse.getCreatedAt().equals(from)) &&
+                                (userResponse.getCreatedAt().isBefore(to) || userResponse.getCreatedAt().equals(to)))
+                .count();
+        Map<Long, Long> userIdToBorrowCount = new HashMap<>();
+        for (Borrowing b : borrowings) {
+            Long userId = b.getUserId();
+            userIdToBorrowCount.put(userId, userIdToBorrowCount.getOrDefault(userId, 0L) + 1);
+        }
+        return UserStatisticsResponse.builder()
+                .totalUsers(userResponses.size())
+                .activeUsers(activeUsers)
+                .newRegistrations(newRegistrations)
+                .avgBorrowsPerUser((double) borrowings.size() / userResponses.size())
+                .topActiveUsers(userIdToBorrowCount.entrySet().stream()
+                        .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+                        .limit(3)
+                        .map(entry -> {
+                            Long userId = entry.getKey();
+                            Long borrowCount = entry.getValue();
+                            UserResponse user = usersFeignClient.getUserById(userId).getBody().getData();
+                            return new UserStatisticsResponse.userDTO(
+                                    userId,
+                                    user.getEmail(),
+                                    user.getFullName(),
+                                    borrowCount
+                            );
+                        })
+                        .collect(Collectors.toList())
+                )
                 .build();
     }
 }

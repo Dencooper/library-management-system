@@ -7,6 +7,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient("USER-SERVICE")
 public interface UsersFeignClient {
     @GetMapping(value = "/api/v1/users/{id}", consumes = "application/json")
@@ -21,4 +23,6 @@ public interface UsersFeignClient {
     @GetMapping("/api/v1/internal/users/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserByIdInternal(@PathVariable Long id, @RequestHeader("X-Internal-Api-Key") String apiKeyHeader);
 
+    @GetMapping(value = "/api/v1/users", consumes = "application/json")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers();
 }

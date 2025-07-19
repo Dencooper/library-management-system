@@ -5,6 +5,7 @@ import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingStatisticsResponse;
+import com.library.borrowingservice.dto.response.borrowing.UserStatisticsResponse;
 import com.library.borrowingservice.model.Borrowing;
 
 import java.time.LocalDateTime;
@@ -22,4 +23,5 @@ public interface IBorrowingService {
     Void sendReturnReminderBorrowingEmail();
     BorrowingStatisticsResponse doBorrowingStatistics(LocalDateTime from, LocalDateTime to);
     BookStatisticsResponse doBookStatistic(LocalDateTime from, LocalDateTime to);
+    UserStatisticsResponse doUserStatistic(LocalDateTime from, LocalDateTime to);
 }

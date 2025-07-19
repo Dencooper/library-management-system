@@ -5,6 +5,7 @@ import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingResponse;
 import com.library.borrowingservice.dto.response.borrowing.BorrowingStatisticsResponse;
+import com.library.borrowingservice.dto.response.borrowing.UserStatisticsResponse;
 import com.library.borrowingservice.service.IBorrowingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +79,16 @@ public class BorrowingController {
         LocalDateTime from = fromDate.atStartOfDay();
         LocalDateTime to = toDate.atStartOfDay();
         return ResponseEntity.ok().body(iBorrowingService.doBookStatistic(from, to));
+    }
+
+    @GetMapping("/user-statistic")
+    public ResponseEntity<UserStatisticsResponse> getUserStat(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ){
+        LocalDateTime from = fromDate.atStartOfDay();
+        LocalDateTime to = toDate.atStartOfDay();
+        return ResponseEntity.ok().body(iBorrowingService.doUserStatistic(from, to));
     }
 
 //    @Scheduled(cron = "0 */2 * * * *")

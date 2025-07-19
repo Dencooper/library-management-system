@@ -18,6 +18,4 @@ public class BookItemResponse {
     private Double price;
     private BookItemCondition bookItemCondition;
     private boolean available;
-
-
 }
