@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.library</groupId>
-	<artifactId>account-service</artifactId>
+	<artifactId>user-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>account-service</name>
+	<name>user-service</name>
 	<description>Book Service for Library Management System</description>
 	<url/>
 	<licenses>

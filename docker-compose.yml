@@ -1,0 +1,144 @@
+version: "3.8"
+
+services:
+  authdb:
+    image: mysql
+    container_name: authdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: auth_service_db
+    ports:
+      - 3310:3306
+    networks:
+      - microservices-network
+    volumes:
+      - /c/docker-volumes/mysql/authdb:/var/lib/mysql
+
+  userdb:
+    image: mysql
+    container_name: userdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: user_service_db
+    ports:
+      - 3307:3306
+    networks:
+      - microservices-network
+    volumes:
+      - /c/docker-volumes/mysql/userdb:/var/lib/mysql
+
+  bookdb:
+    image: mysql
+    container_name: bookdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: book_service_db
+    ports:
+      - 3308:3306
+    networks:
+      - microservices-network
+    volumes:
+      - /c/docker-volumes/mysql/bookdb:/var/lib/mysql
+
+  borrowingdb:
+    image: mysql
+    container_name: borrowingdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: borrowing_service_db
+    ports:
+      - 3309:3306
+    networks:
+      - microservices-network
+    volumes:
+      - /c/docker-volumes/mysql/borrowingdb:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+    hostname: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices-network
+
+  discovery-server:
+    build:
+      context: ./discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    container_name: discovery-server
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    container_name: api-gateway
+    depends_on:
+      - discovery-server
+      - redis
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    ports:
+      - "9004:9004"
+    networks:
+      - microservices-network
+    container_name: auth-service
+    depends_on:
+      - discovery-server
+      - authdb
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    ports:
+      - "9002:9002"
+    networks:
+      - microservices-network
+    container_name: user-service
+    depends_on:
+      - discovery-server
+      - userdb
+
+  book-service:
+    build:
+      context: .
+      dockerfile: book-service/Dockerfile
+    ports:
+      - "9001:9001"
+    networks:
+      - microservices-network
+    container_name: book-service
+    depends_on:
+      - discovery-server
+      - bookdb
+
+  borrowing-service:
+    build:
+      context: .
+      dockerfile: borrowing-service/Dockerfile
+    ports:
+      - "9003:9003"
+    networks:
+      - microservices-network
+    container_name: borrowing-service
+    depends_on:
+      - discovery-server
+      - borrowingdb
+      - book-service
+      - user-service
+      - auth-service
+
+networks:
+  microservices-network:
+    driver: bridge
