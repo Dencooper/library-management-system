@@ -1,5 +1,6 @@
 package com.library.borrowingservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
@@ -27,7 +28,7 @@ public class BorrowingController {
     private final IBorrowingService iBorrowingService;
 
     @PostMapping
-    public ResponseEntity<BorrowingResponse> createBorrowing(@Valid @RequestBody BorrowingCreationRequest request){
+    public ResponseEntity<BorrowingResponse> createBorrowing(@Valid @RequestBody BorrowingCreationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(iBorrowingService.createBorrowing(request));
     }
 

@@ -1,5 +1,7 @@
 package com.library.borrowingservice.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.request.penalty.PenaltyCreationRequest;
@@ -43,6 +45,7 @@ public class BorrowingServiceImpl implements IBorrowingService {
     private final UsersFeignClient usersFeignClient;
     private final AuthFeignClient authFeignClient;
     private final KafkaService kafkaService;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional

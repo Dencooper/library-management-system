@@ -38,8 +38,12 @@ public class listenGroupMail {
 //        System.out.println("DTL receiving message: " + message);
 //    }
 
-    @KafkaListener(id = "notificationGroup1", topics = "borrowingNotification")
+    @KafkaListener(id = "notificationGroup1", topics = "borrowingNotification", containerFactory = "kafkaListenerContainerFactory")
     public void listenBorrowingNotification(String message) throws JsonProcessingException {
+        System.out.println("Test Received borrowing: " + message);
+        if (message.startsWith("\"") && message.endsWith("\"")) {
+            message = message.substring(1, message.length() - 1).replace("\\\"", "\"");
+        }
         BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
         Map<String, Object> placeholders = new HashMap<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
@@ -55,20 +59,20 @@ public class listenGroupMail {
         emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Borrowing #" + payload.getId() + " - Online Library", "borrowingNotificationTemplate.ftl", placeholders, null);
     }
 
-    @KafkaListener(id = "notificationGroup2", topics = "returnReminderNotification")
-    public void listenReturnReminderNotification(String message) throws JsonProcessingException {
-        BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
-        Map<String, Object> placeholders = new HashMap<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        placeholders.put("studentName", payload.getUser().getFullName());
-        placeholders.put("studentEmail", payload.getUser().getEmail());
-        placeholders.put("studentPhone", payload.getUser().getPhone());
-        placeholders.put("librarianName", payload.getLibrarian().getFullName());
-        placeholders.put("librarianEmail", payload.getLibrarian().getEmail());
-        placeholders.put("librarianPhone", payload.getLibrarian().getPhone());
-        placeholders.put("borrowedAt", payload.getBorrowedAt().format(formatter));
-        placeholders.put("dueDate", payload.getBorrowedAt().plusDays(30).format(formatter));
-        placeholders.put("borrowedBooks", payload.getItems());
-        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Reminder Return Borrowing #" + payload.getId() + " - Online Library", "returnReminderNotificationTemplate.ftl", placeholders, null);
-    }
+//    @KafkaListener(id = "notificationGroup2", topics = "returnReminderNotification", containerFactory = "kafkaListenerContainerFactory")
+//    public void listenReturnReminderNotification(String message) throws JsonProcessingException {
+//        BorrowingResponse payload = objectMapper.readValue(message, BorrowingResponse.class);
+//        Map<String, Object> placeholders = new HashMap<>();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+//        placeholders.put("studentName", payload.getUser().getFullName());
+//        placeholders.put("studentEmail", payload.getUser().getEmail());
+//        placeholders.put("studentPhone", payload.getUser().getPhone());
+//        placeholders.put("librarianName", payload.getLibrarian().getFullName());
+//        placeholders.put("librarianEmail", payload.getLibrarian().getEmail());
+//        placeholders.put("librarianPhone", payload.getLibrarian().getPhone());
+//        placeholders.put("borrowedAt", payload.getBorrowedAt().format(formatter));
+//        placeholders.put("dueDate", payload.getBorrowedAt().plusDays(30).format(formatter));
+//        placeholders.put("borrowedBooks", payload.getItems());
+//        emailService.sendEmailWithTemplate(payload.getUser().getEmail(), "Reminder Return Borrowing #" + payload.getId() + " - Online Library", "returnReminderNotificationTemplate.ftl", placeholders, null);
+//    }
 }

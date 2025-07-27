@@ -1,5 +1,6 @@
 package com.library.borrowingservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.borrowingservice.dto.request.borrowing.BorrowingCreationRequest;
 import com.library.borrowingservice.dto.request.borrowing.ReturnBookRequest;
 import com.library.borrowingservice.dto.response.borrowing.BookStatisticsResponse;
