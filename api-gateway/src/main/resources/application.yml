@@ -68,3 +68,13 @@ library:
     base64-secret: "+b83oBEOVUWQeuHEtEqoo2rIovHLrBonFEeYtsJ1tFqF9EYvdZrmi8FFfHqhMakUe3mkfFgUDK+jUxc+hga7/w=="
     access-token-validity-in-seconds: 86400
     refresh-token-validity-in-seconds: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true

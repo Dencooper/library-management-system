@@ -79,6 +79,8 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers("/api/v1/internal/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/users/quantity").permitAll()
+                                .requestMatchers("/actuator/prometheus").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

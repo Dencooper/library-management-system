@@ -69,6 +69,8 @@ public class SecurityConfiguration {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(whiteList).permitAll()
+                        .pathMatchers("/actuator/prometheus").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/book-items/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/v1/internal/**").permitAll()

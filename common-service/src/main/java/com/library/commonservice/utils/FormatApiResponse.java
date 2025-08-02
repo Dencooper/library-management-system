@@ -30,6 +30,11 @@ public class FormatApiResponse implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
 
+        String path = request.getURI().getPath();
+        if (path.startsWith("/actuator")) {
+            return body;
+        }
+
         HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
         int status = servletResponse.getStatus();
 
